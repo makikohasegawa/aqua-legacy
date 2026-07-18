@@ -30,6 +30,35 @@ Aqua Legacyは、人とAIが共に成長し、一人ひとりが自分らしく�
 
 思想面（vision / story / philosophy / principles）を育てている段階。技術スタックは未定。
 
+## Being Log — Prototype (OpenAI Build Week)
+
+A small working prototype built for OpenAI Build Week, living inside this project.
+
+### Features
+
+- Being Log prototype
+- Save daily memories
+- Local storage
+- Backup and restore (JSON export/import)
+
+### Tech stack
+
+- HTML
+- CSS
+- JavaScript
+
+### How to run
+
+Open `src/being-log/index.html` in a browser.
+
+### Current status
+
+Early prototype for the Aqua Legacy vision.
+
+### Roadmap
+
+Expand from Being Log into the living aquarium simulation.
+
 ## 協働体制
 
 - **人間（長谷川牧子）**: 最終的な意思決定者。AIは伴走者。
