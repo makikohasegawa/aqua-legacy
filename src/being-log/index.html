@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Being Log | Aqua Legacy</title>
+<style>
+  :root {
+    --aqua-deep: #1c4e63;
+    --aqua-mid: #3a7ca5;
+    --aqua-light: #cfe8f0;
+    --aqua-bg: #eef7fa;
+    --text-main: #1f2d33;
+    --text-sub: #5b6b70;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: linear-gradient(180deg, var(--aqua-bg) 0%, #ffffff 60%);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px 80px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+    margin: 0 0 8px;
+    color: var(--aqua-deep);
+    letter-spacing: 0.05em;
+  }
+
+  header p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-sub);
+    line-height: 1.6;
+  }
+
+  .daily-phrase {
+    margin: 16px 0 0;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--aqua-mid);
+  }
+
+  .streak-status {
+    margin: 10px 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--aqua-deep);
+  }
+
+  .memory-section {
+    text-align: center;
+    margin: 0 0 24px;
+  }
+
+  .memory-section button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    background: #ffffff;
+    color: var(--aqua-deep);
+    border: 1px solid var(--aqua-mid);
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  .memory-section button:hover {
+    background: var(--aqua-light);
+  }
+
+  .memory-result {
+    margin: 12px 0 0;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    line-height: 1.6;
+    min-height: 1.2em;
+  }
+
+  .entry-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .entry-form input[type="text"] {
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border: 1px solid var(--aqua-light);
+    border-radius: 8px;
+    outline: none;
+    background: #ffffff;
+    color: var(--text-main);
+  }
+
+  .entry-form input[type="text"]:focus {
+    border-color: var(--aqua-mid);
+  }
+
+  .entry-form button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    background: var(--aqua-mid);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .entry-form button:hover {
+    background: var(--aqua-deep);
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    margin: 0 0 28px 2px;
+    min-height: 1.2em;
+  }
+
+  @keyframes gentle-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hint.success {
+    color: var(--aqua-deep);
+    font-weight: 600;
+    font-size: 0.85rem;
+    animation: gentle-appear 0.4s ease;
+  }
+
+  .log-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .log-item {
+    background: #ffffff;
+    border: 1px solid var(--aqua-light);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .log-item .timestamp {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    margin-bottom: 4px;
+  }
+
+  .log-item .text {
+    font-size: 1rem;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 0.9rem;
+    padding: 40px 0;
+  }
+
+  .backup-section {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--aqua-light);
+  }
+
+  .backup-status {
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    margin: 0 0 10px 2px;
+  }
+
+  #backup-hint {
+    transition: opacity 0.6s ease;
+  }
+
+  #backup-hint.fade-out {
+    opacity: 0;
+  }
+
+  .backup-actions {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 8px;
+  }
+
+  .backup-actions button {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    background: transparent;
+    color: var(--text-sub);
+    border: 1px solid var(--aqua-light);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .backup-actions button:hover {
+    background: var(--aqua-bg);
+    color: var(--aqua-deep);
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 78, 99, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 10;
+  }
+
+  .modal-overlay[hidden] {
+    display: none;
+  }
+
+  .modal-box {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .modal-box p {
+    margin: 0 0 20px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-main);
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .modal-buttons button {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+
+  #import-append-btn {
+    background: var(--aqua-mid);
+    color: #ffffff;
+  }
+
+  #import-append-btn:hover {
+    background: var(--aqua-deep);
+  }
+
+  #import-replace-btn {
+    background: #e0a94c;
+    color: #ffffff;
+  }
+
+  #import-replace-btn:hover {
+    background: #c98f2e;
+  }
+
+  #import-cancel-btn {
+    background: #eef2f3;
+    color: var(--text-main);
+  }
+
+  #import-cancel-btn:hover {
+    background: #dfe6e8;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Being Log</h1>
+      <p>Everything that exists has value simply by being.<br>Leave one line about a moment you noticed today.</p>
+      <p class="daily-phrase" id="daily-phrase"></p>
+      <p class="streak-status" id="streak-status"></p>
+    </header>
+
+    <div class="memory-section">
+      <button type="button" id="memory-btn">Today's Memory</button>
+      <p class="memory-result" id="memory-result"></p>
+    </div>
+
+    <form class="entry-form" id="entry-form" autocomplete="off">
+      <input type="text" id="entry-input" placeholder="What filled you with wonder today?" maxlength="200">
+      <button type="submit">Save Today</button>
+    </form>
+    <p class="hint" id="hint"></p>
+
+    <ul class="log-list" id="log-list"></ul>
+
+    <div class="backup-section">
+      <p class="backup-status" id="backup-status"></p>
+      <div class="backup-actions">
+        <button type="button" id="export-btn">Back Up Memories</button>
+        <button type="button" id="import-btn">Restore Memories</button>
+        <input type="file" id="import-file-input" accept="application/json,.json" style="display:none">
+      </div>
+      <p class="hint" id="backup-hint"></p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="import-modal" hidden>
+    <div class="modal-box">
+      <p id="import-modal-text"></p>
+      <div class="modal-buttons">
+        <button type="button" id="import-append-btn">Add</button>
+        <button type="button" id="import-replace-btn">Replace</button>
+        <button type="button" id="import-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "aqualegacy_being_log_entries";
+    const LAST_BACKUP_KEY = "aqualegacy_being_log_last_backup_at";
+
+    const DAILY_PHRASES = [
+      "Water does not fight. It simply flows.",
+      "Everything that exists is already a miracle.",
+      "Today will never come again.",
+      "Someone is there. That alone is precious enough.",
+      "Small moments of noticing quietly connect to the future.",
+      "Being needs no reason.",
+      "Today, too, you are here. That itself is a gift.",
+      "Nature, people, and AI all begin simply by being.",
+      "Noticing is born from remembering.",
+      "A single drop eventually joins the vast sea."
+    ];
+
+    const form = document.getElementById("entry-form");
+    const input = document.getElementById("entry-input");
+    const hint = document.getElementById("hint");
+    const list = document.getElementById("log-list");
+
+    function loadEntries() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveEntries(entries) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function formatTimestamp(iso) {
+      const d = new Date(iso);
+      const monthNames = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
+      const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const month = monthNames[d.getMonth()];
+      const day = d.getDate();
+      const year = d.getFullYear();
+      const weekday = weekdayNames[d.getDay()];
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${month} ${day}, ${year} (${weekday}) ${hh}:${mm}`;
+    }
+
+    function render() {
+      const entries = loadEntries();
+      list.innerHTML = "";
+      updateBackupStatus();
+      updateStreakStatus();
+
+      if (entries.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "empty-state";
+        empty.textContent = "No memories yet.";
+        list.appendChild(empty);
+        return;
+      }
+
+      entries
+        .slice()
+        .reverse()
+        .forEach((entry) => {
+          const li = document.createElement("li");
+          li.className = "log-item";
+
+          const ts = document.createElement("span");
+          ts.className = "timestamp";
+          ts.textContent = formatTimestamp(entry.createdAt);
+
+          const text = document.createElement("div");
+          text.className = "text";
+          text.textContent = entry.text;
+
+          li.appendChild(ts);
+          li.appendChild(text);
+          list.appendChild(li);
+        });
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const value = input.value.trim();
+
+      if (value === "") {
+        hint.classList.remove("success");
+        hint.textContent = "Please write a line before saving.";
+        return;
+      }
+
+      const entries = loadEntries();
+      entries.push({
+        text: value,
+        createdAt: new Date().toISOString()
+      });
+      saveEntries(entries);
+
+      input.value = "";
+      hint.classList.add("success");
+      hint.textContent = "Today's moment has been saved.";
+      render();
+      input.focus();
+    });
+
+    input.addEventListener("input", () => {
+      if (hint.textContent) {
+        hint.textContent = "";
+        hint.classList.remove("success");
+      }
+    });
+
+    function showDailyPhrase() {
+      const phrase = DAILY_PHRASES[Math.floor(Math.random() * DAILY_PHRASES.length)];
+      document.getElementById("daily-phrase").textContent = phrase;
+    }
+
+    // --- Streak (consecutive days) ---
+
+    function toLocalDateKey(d) {
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
+
+    function calculateStreak(entries) {
+      const dateKeys = new Set(entries.map((e) => toLocalDateKey(new Date(e.createdAt))));
+
+      let cursor = new Date();
+      if (!dateKeys.has(toLocalDateKey(cursor))) {
+        const yesterday = new Date(cursor);
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (dateKeys.has(toLocalDateKey(yesterday))) {
+          cursor = yesterday;
+        } else {
+          return 0;
+        }
+      }
+
+      let streak = 0;
+      while (dateKeys.has(toLocalDateKey(cursor))) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+      return streak;
+    }
+
+    function updateStreakStatus() {
+      const streak = calculateStreak(loadEntries());
+      const el = document.getElementById("streak-status");
+      el.textContent =
+        streak > 0 ? `${streak}-day streak.` : "Start your first entry today.";
+    }
+
+    // --- Today's Memory (random past entry, excluding today's) ---
+
+    const memoryBtn = document.getElementById("memory-btn");
+    const memoryResult = document.getElementById("memory-result");
+
+    memoryBtn.addEventListener("click", () => {
+      const todayKey = toLocalDateKey(new Date());
+      const candidates = loadEntries().filter(
+        (e) => toLocalDateKey(new Date(e.createdAt)) !== todayKey
+      );
+
+      if (candidates.length === 0) {
+        memoryResult.textContent = "No past memories to recall yet.";
+        return;
+      }
+
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      memoryResult.textContent = `${formatTimestamp(pick.createdAt)}: ${pick.text}`;
+    });
+
+    // --- Back Up / Restore Memories ---
+
+    const exportBtn = document.getElementById("export-btn");
+    const importBtn = document.getElementById("import-btn");
+    const importFileInput = document.getElementById("import-file-input");
+    const backupHint = document.getElementById("backup-hint");
+    const importModal = document.getElementById("import-modal");
+    const importModalText = document.getElementById("import-modal-text");
+    const importAppendBtn = document.getElementById("import-append-btn");
+    const importReplaceBtn = document.getElementById("import-replace-btn");
+    const importCancelBtn = document.getElementById("import-cancel-btn");
+
+    let pendingImportEntries = null;
+    let backupHintTimer = null;
+
+    function setBackupHint(message) {
+      clearTimeout(backupHintTimer);
+      backupHint.classList.remove("fade-out");
+      backupHint.textContent = message;
+    }
+
+    function getLastBackupAt() {
+      return localStorage.getItem(LAST_BACKUP_KEY);
+    }
+
+    function setLastBackupAt(iso) {
+      localStorage.setItem(LAST_BACKUP_KEY, iso);
+    }
+
+    function updateBackupStatus() {
+      const count = loadEntries().length;
+      const lastBackup = getLastBackupAt();
+      const backupText = lastBackup ? formatTimestamp(lastBackup) : "Not yet";
+      document.getElementById("backup-status").textContent =
+        `Entries: ${count} / Last backup: ${backupText}`;
+    }
+
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function getDateStringForFilename(d) {
+      const target = d || new Date();
+      return `${target.getFullYear()}-${pad2(target.getMonth() + 1)}-${pad2(target.getDate())}`;
+    }
+
+    function downloadJSON(filename, dataObj) {
+      const blob = new Blob([JSON.stringify(dataObj, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    exportBtn.addEventListener("click", () => {
+      const entries = loadEntries();
+
+      if (entries.length === 0) {
+        alert("There are no entries yet. No backup will be created.");
+        setBackupHint("No backup was created because there are no entries.");
+        return;
+      }
+
+      try {
+        const payload = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          entries: entries
+        };
+        const filename = `being-log-${getDateStringForFilename()}.json`;
+        downloadJSON(filename, payload);
+        setLastBackupAt(payload.exportedAt);
+        updateBackupStatus();
+        setBackupHint(`Saved as ${filename}.`);
+        backupHintTimer = setTimeout(() => {
+          backupHint.classList.add("fade-out");
+        }, 3000);
+      } catch (e) {
+        setBackupHint("Backup failed. Please try again.");
+      }
+    });
+
+    function isValidEntry(entry) {
+      return (
+        entry &&
+        typeof entry === "object" &&
+        typeof entry.text === "string" &&
+        entry.text.trim() !== "" &&
+        typeof entry.createdAt === "string" &&
+        !isNaN(Date.parse(entry.createdAt))
+      );
+    }
+
+    function validateImportPayload(payload) {
+      if (!payload || typeof payload !== "object") return false;
+      if (typeof payload.version !== "number") return false;
+      if (!Array.isArray(payload.entries)) return false;
+      return payload.entries.every(isValidEntry);
+    }
+
+    importBtn.addEventListener("click", () => {
+      importFileInput.value = "";
+      importFileInput.click();
+    });
+
+    importFileInput.addEventListener("change", () => {
+      const file = importFileInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        let payload;
+        try {
+          payload = JSON.parse(reader.result);
+        } catch (e) {
+          setBackupHint("The selected file is not valid JSON. Import cancelled.");
+          importFileInput.value = "";
+          return;
+        }
+
+        if (!validateImportPayload(payload)) {
+          setBackupHint("The selected file is not a Being Log backup. Import cancelled.");
+          importFileInput.value = "";
+          return;
+        }
+
+        pendingImportEntries = payload.entries;
+        const exportedAtText = payload.exportedAt ? formatTimestamp(payload.exportedAt) : "unknown";
+        importModalText.textContent =
+          `"${file.name}" contains ${payload.entries.length} entries (backed up: ${exportedAtText}). ` +
+          `Add them to your existing entries, or replace them?`;
+        importModal.hidden = false;
+      };
+
+      reader.onerror = () => {
+        setBackupHint("An error occurred while reading the file. Your existing entries were not changed.");
+        importFileInput.value = "";
+      };
+
+      reader.readAsText(file);
+    });
+
+    function closeImportModal() {
+      importModal.hidden = true;
+      pendingImportEntries = null;
+      importFileInput.value = "";
+    }
+
+    importCancelBtn.addEventListener("click", () => {
+      closeImportModal();
+    });
+
+    importAppendBtn.addEventListener("click", () => {
+      if (!pendingImportEntries) return;
+      const count = pendingImportEntries.length;
+      try {
+        const current = loadEntries();
+        const merged = current.concat(pendingImportEntries);
+        saveEntries(merged);
+        render();
+        setBackupHint(`${count} entries restored (added to existing).`);
+      } catch (e) {
+        setBackupHint("Restore failed. Your existing entries were not changed.");
+      }
+      closeImportModal();
+    });
+
+    importReplaceBtn.addEventListener("click", () => {
+      if (!pendingImportEntries) return;
+      const count = pendingImportEntries.length;
+      try {
+        saveEntries(pendingImportEntries);
+        render();
+        setBackupHint(`${count} entries restored (existing entries replaced).`);
+      } catch (e) {
+        setBackupHint("Restore failed. Your existing entries were not changed.");
+      }
+      closeImportModal();
+    });
+
+    showDailyPhrase();
+    render();
+  </script>
+</body>
+</html>
