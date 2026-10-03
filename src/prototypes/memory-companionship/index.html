@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>この記憶を、このAquaと共に持つ（実験）</title>
+<style>
+  :root {
+    --aqua-deep: #1c4e63;
+    --aqua-mid: #3a7ca5;
+    --aqua-light: #cfe8f0;
+    --aqua-bg: #eef7fa;
+    --text-main: #1f2d33;
+    --text-sub: #5b6b70;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: linear-gradient(180deg, var(--aqua-bg) 0%, #ffffff 60%);
+    color: var(--text-main);
+  }
+
+  header {
+    padding: 28px 24px 12px;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--aqua-deep);
+    letter-spacing: 0.02em;
+  }
+  header p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.7;
+  }
+
+  .layout {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 12px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .section {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--aqua-light);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+  .section h2 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: var(--aqua-deep);
+    font-weight: 600;
+  }
+  .section .section-note {
+    margin: 0 0 12px;
+    font-size: 12px;
+    color: var(--text-sub);
+    line-height: 1.7;
+  }
+  .empty {
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.8;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .row-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(58, 124, 165, 0.12);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .row-item:last-child { border-bottom: none; }
+  .row-item:hover { background: rgba(58, 124, 165, 0.06); }
+  .row-item.selected {
+    background: rgba(28, 78, 99, 0.08);
+    box-shadow: inset 0 0 0 1px var(--aqua-mid);
+  }
+  .row-item.disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .row-item.disabled:hover { background: none; }
+
+  .row-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .row-title {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-main);
+    word-break: break-word;
+  }
+  .row-meta {
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 2px;
+  }
+  .row-sub-note {
+    font-size: 11px;
+    color: var(--text-sub);
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  /* Aquaと共にある記憶(Section2でふりかえる記憶)の見た目。
+     「選べない項目」ではなく「そこに大切に存在しているもの」として、
+     .row-item/.disabledとは別に、控えめな背景と左の一本線だけで表す。
+     アニメーション・グロー等の演出は加えない。 */
+  .companion-memory-item {
+    background: rgba(207, 232, 240, 0.35);
+    border-left: 3px solid var(--aqua-mid);
+    border-radius: 6px;
+    padding: 10px 12px 10px 14px;
+    margin-bottom: 6px;
+  }
+  .companion-memory-item:last-child { margin-bottom: 0; }
+
+  /* Aquaを見ることと、記憶を開くことを分けるための、静かな入口。
+     普段は目立たず、押せることだけがそっと分かる程度にする。 */
+  .memory-entrance-link {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--aqua-mid);
+    margin-top: 4px;
+    cursor: pointer;
+  }
+  .memory-entrance-link:hover { text-decoration: underline; }
+
+  .swatch {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-top: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .confirm-row {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .confirm-btn {
+    background: var(--aqua-deep);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .confirm-btn:disabled {
+    background: var(--aqua-light);
+    color: var(--text-sub);
+    cursor: not-allowed;
+  }
+  .confirm-btn:not(:disabled):hover { background: var(--aqua-mid); }
+
+  .confirm-message {
+    font-size: 12px;
+    color: var(--aqua-deep);
+    min-height: 1.6em;
+  }
+
+  .view-empty {
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.8;
+    padding: 4px 2px;
+  }
+
+  .footnote {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    opacity: 0.75;
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>この記憶を、このAquaと共に持つ（実験）</h1>
+    <p>これは最小の実験です。Being Log・Aqua（水槽）のいずれのデータにも手を加えていません。</p>
+  </header>
+
+  <div class="layout">
+    <div class="section" id="linkSection">
+      <h2>1. 記憶を結ぶ</h2>
+      <p class="section-note">Being Logの記録を1件、次にAquaを1匹選んでください。</p>
+
+      <div id="recordList" class="list"></div>
+      <div id="linkAquaList" class="list" style="margin-top: 10px;"></div>
+
+      <div class="confirm-row">
+        <button id="confirmBtn" class="confirm-btn" disabled>この記憶を、Aquaと共に持つ</button>
+        <p id="confirmMessage" class="confirm-message"></p>
+      </div>
+    </div>
+
+    <div class="section" id="viewSection">
+      <h2>2. Aquaから記憶をふりかえる</h2>
+      <p class="section-note">共にある記憶があるAquaには、静かな入口が表示されます。見たいときに開いてください。</p>
+
+      <div id="viewAquaList" class="list"></div>
+    </div>
+
+    <p class="footnote">
+      この関係は、記録することへのご褒美でも、しなかったことへの罰でもありません。<br />
+      本人が選んだときにだけ、静かに結ばれるものです。
+    </p>
+  </div>
+
+<script>
+  var BEING_LOG_STORAGE_KEY = "aqualegacy_being_log_entries"; // 読み取り専用
+  var BEINGS_STORAGE_KEY = "aqualegacy_beings"; // 読み取り専用
+  var COMPANIONSHIP_STORAGE_KEY = "aqualegacy_memory_companionships"; // この実験だけが書き込む
+
+  // aquarium/index.htmlのCOLOR_HEXと同じ色。gold/silverはaquarium側では
+  // グラデーションで表現しているが、ここでは簡易な色の丸として近似する。
+  var COLOR_HEX = {
+    red: "#e2483d",
+    orange: "#f2924c",
+    yellow: "#f4d35e",
+    green: "#4f9d69",
+    turquoise: "#3fb8af",
+    lightBlue: "#8ecae6",
+    blue: "#3a7ca5",
+    purple: "#8e6bb0",
+    pink: "#e88fb0",
+    white: "#f5f5f0",
+    black: "#2b2b2b",
+    brown: "#8b5e3c",
+    gold: "#d4af37",
+    silver: "#c0c0c0"
+  };
+
+  function loadBeingLogEntries() {
+    try {
+      var raw = localStorage.getItem(BEING_LOG_STORAGE_KEY);
+      var entries = raw ? JSON.parse(raw) : [];
+      return Array.isArray(entries) ? entries : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function loadBeings() {
+    try {
+      var raw = localStorage.getItem(BEINGS_STORAGE_KEY);
+      var beings = raw ? JSON.parse(raw) : [];
+      return Array.isArray(beings) ? beings : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function loadCompanionships() {
+    try {
+      var raw = localStorage.getItem(COMPANIONSHIP_STORAGE_KEY);
+      var list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveCompanionships(list) {
+    localStorage.setItem(COMPANIONSHIP_STORAGE_KEY, JSON.stringify(list));
+  }
+
+  function generateCompanionshipId() {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return "companionship-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function formatDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var m = d.getMonth() + 1, day = d.getDate(), y = d.getFullYear();
+    return y + "/" + m + "/" + day;
+  }
+
+  function formatRecordNumber(n) {
+    return "#" + String(n).padStart(6, "0");
+  }
+
+  // DEC-0012の初回移行より前の状態でBeing Logを一度も開いていない場合、
+  // recordNumberを持たない記録が理論上ありうる。この実験では、そうした
+  // 記録は選択対象に含めない（Being Log側のデータは変更しない）。
+  function recordsWithRecordNumber(entries) {
+    return entries.filter(function (e) { return e && typeof e.recordNumber === "number"; });
+  }
+
+  var recordListEl = document.getElementById("recordList");
+  var linkAquaListEl = document.getElementById("linkAquaList");
+  var viewAquaListEl = document.getElementById("viewAquaList");
+  var confirmBtn = document.getElementById("confirmBtn");
+  var confirmMessageEl = document.getElementById("confirmMessage");
+
+  var selectedRecordNumber = null; // 結ぼうとしている記憶(recordNumber)
+  var selectedLinkBeingId = null;  // 結ぼうとしているAqua
+  var openBeingId = null;          // 「このAquaと共にある記憶」を開いているAqua(1つまで)
+
+  function beingDisplayName(being, index) {
+    return being && being.name ? being.name : "(名前未設定のAqua)";
+  }
+
+  function render() {
+    var allEntries = loadBeingLogEntries();
+    var records = recordsWithRecordNumber(allEntries).slice().sort(function (a, b) {
+      return b.recordNumber - a.recordNumber; // 新しい記録から表示
+    });
+    var beings = loadBeings();
+    var companionships = loadCompanionships();
+
+    var companionshipByRecordNumber = {};
+    companionships.forEach(function (c) {
+      companionshipByRecordNumber[c.beingLogRecordNumber] = c;
+    });
+
+    renderRecordList(allEntries, records, companionshipByRecordNumber, beings);
+    renderLinkAquaList(beings);
+    updateConfirmState();
+
+    renderViewAquaList(beings, companionships, allEntries);
+  }
+
+  function renderRecordList(allEntries, records, companionshipByRecordNumber, beings) {
+    recordListEl.innerHTML = "";
+
+    if (allEntries.length === 0) {
+      recordListEl.innerHTML = '<p class="empty">Being Logにはまだ記録がありません。まずBeing Logで、今日の小さな気づきを記録してみてください。</p>';
+      return;
+    }
+    if (records.length === 0) {
+      recordListEl.innerHTML = '<p class="empty">Being Logの記録はありますが、recordNumberがまだ設定されていません。一度Being Logを開くと表示されるようになります。</p>';
+      return;
+    }
+
+    var beingById = {};
+    beings.forEach(function (b) { beingById[b.id] = b; });
+
+    records.forEach(function (entry) {
+      var companionship = companionshipByRecordNumber[entry.recordNumber];
+      var item = document.createElement("div");
+      item.className = "row-item";
+      if (companionship) item.classList.add("disabled");
+      if (!companionship && selectedRecordNumber === entry.recordNumber) item.classList.add("selected");
+
+      var main = document.createElement("div");
+      main.className = "row-main";
+
+      var title = document.createElement("div");
+      title.className = "row-title";
+      title.textContent = formatRecordNumber(entry.recordNumber) + "  " + entry.text;
+
+      var meta = document.createElement("div");
+      meta.className = "row-meta";
+      meta.textContent = formatDate(entry.createdAt);
+
+      main.appendChild(title);
+      main.appendChild(meta);
+
+      if (companionship) {
+        var note = document.createElement("div");
+        note.className = "row-sub-note";
+        note.textContent = "この記憶は、すでに別のAquaと共にあります。";
+        main.appendChild(note);
+      }
+
+      item.appendChild(main);
+
+      if (!companionship) {
+        item.addEventListener("click", function () {
+          selectedRecordNumber = entry.recordNumber;
+          render();
+        });
+      }
+
+      recordListEl.appendChild(item);
+    });
+  }
+
+  // Section1(記憶を結ぶ)専用。行を選ぶこと自体が「結ぶ相手を選ぶ」操作なので、
+  // 行全体をクリック対象にする。Section2(ふりかえる)はこれとは別の、
+  // 「見る」と「開く」を分けたrenderViewAquaRow()を使う。
+  function renderAquaRow(being, isSelected, onClick) {
+    var item = document.createElement("div");
+    item.className = "row-item";
+    if (isSelected) item.classList.add("selected");
+
+    var swatch = document.createElement("div");
+    swatch.className = "swatch";
+    var color = being.nature && COLOR_HEX[being.nature.bodyColor];
+    swatch.style.background = color || "#cccccc";
+
+    var main = document.createElement("div");
+    main.className = "row-main";
+    var title = document.createElement("div");
+    title.className = "row-title";
+    title.textContent = beingDisplayName(being);
+    main.appendChild(title);
+
+    item.appendChild(swatch);
+    item.appendChild(main);
+    item.addEventListener("click", onClick);
+    return item;
+  }
+
+  function renderLinkAquaList(beings) {
+    linkAquaListEl.innerHTML = "";
+    if (beings.length === 0) {
+      linkAquaListEl.innerHTML = '<p class="empty">Aquaがまだいません。まず水槽（aquarium）でAquaを迎えてみてください。</p>';
+      return;
+    }
+    beings.forEach(function (being) {
+      var row = renderAquaRow(being, selectedLinkBeingId === being.id, function () {
+        selectedLinkBeingId = being.id;
+        render();
+      });
+      linkAquaListEl.appendChild(row);
+    });
+  }
+
+  function renderViewAquaList(beings, companionships, allEntries) {
+    viewAquaListEl.innerHTML = "";
+    if (beings.length === 0) {
+      viewAquaListEl.innerHTML = '<p class="empty">Aquaがまだいません。まず水槽（aquarium）でAquaを迎えてみてください。</p>';
+      return;
+    }
+
+    var entryByRecordNumber = {};
+    allEntries.forEach(function (e) {
+      if (typeof e.recordNumber === "number") entryByRecordNumber[e.recordNumber] = e;
+    });
+
+    var companionshipsByBeingId = {};
+    companionships.forEach(function (c) {
+      if (!companionshipsByBeingId[c.beingId]) companionshipsByBeingId[c.beingId] = [];
+      companionshipsByBeingId[c.beingId].push(c);
+    });
+
+    beings.forEach(function (being) {
+      var beingCompanionships = companionshipsByBeingId[being.id] || [];
+      viewAquaListEl.appendChild(renderViewAquaRow(being, beingCompanionships, entryByRecordNumber));
+    });
+  }
+
+  // Aquaを見ること自体は、記憶を開く操作にしない。行はクリックしても
+  // 何も起きない、静かな表示のまま。記憶を持つAquaにだけ「このAquaと
+  // 共にある記憶」という入口を添え、押したときだけその場に展開する
+  // (もう一度押す、または別のAquaの入口を開くと閉じる)。
+  function renderViewAquaRow(being, beingCompanionships, entryByRecordNumber) {
+    var item = document.createElement("div");
+    item.className = "row-item"; // 余白・配置だけ流用。クリックリスナーは付けない。
+
+    var swatch = document.createElement("div");
+    swatch.className = "swatch";
+    var color = being.nature && COLOR_HEX[being.nature.bodyColor];
+    swatch.style.background = color || "#cccccc";
+
+    var main = document.createElement("div");
+    main.className = "row-main";
+    var title = document.createElement("div");
+    title.className = "row-title";
+    title.textContent = beingDisplayName(being);
+    main.appendChild(title);
+
+    if (beingCompanionships.length > 0) {
+      var entrance = document.createElement("div");
+      entrance.className = "memory-entrance-link";
+      entrance.textContent = "このAquaと共にある記憶";
+      entrance.addEventListener("click", function () {
+        openBeingId = openBeingId === being.id ? null : being.id;
+        render();
+      });
+      main.appendChild(entrance);
+
+      if (openBeingId === being.id) {
+        main.appendChild(buildMemoryPanel(beingCompanionships, entryByRecordNumber));
+      }
+    }
+
+    item.appendChild(swatch);
+    item.appendChild(main);
+    return item;
+  }
+
+  function buildMemoryPanel(beingCompanionships, entryByRecordNumber) {
+    var panel = document.createElement("div");
+    panel.style.marginTop = "8px";
+
+    var linked = beingCompanionships
+      .map(function (c) { return entryByRecordNumber[c.beingLogRecordNumber]; })
+      .filter(function (e) { return !!e; })
+      .sort(function (a, b) { return b.recordNumber - a.recordNumber; });
+
+    if (linked.length === 0) {
+      var emptyNote = document.createElement("p");
+      emptyNote.className = "view-empty";
+      emptyNote.textContent = "まだ記憶はありません。";
+      panel.appendChild(emptyNote);
+      return panel;
+    }
+
+    linked.forEach(function (entry) {
+      // 「選べない項目」ではなく、このAquaと共にある記憶として表示する。
+      // .row-item/.disabledは使わない(クリックハンドラも付けない)。
+      var memoryItem = document.createElement("div");
+      memoryItem.className = "companion-memory-item";
+
+      var memoryMain = document.createElement("div");
+      var memoryTitle = document.createElement("div");
+      memoryTitle.className = "row-title";
+      memoryTitle.textContent = formatRecordNumber(entry.recordNumber) + "  " + entry.text;
+      var memoryMeta = document.createElement("div");
+      memoryMeta.className = "row-meta";
+      memoryMeta.textContent = formatDate(entry.createdAt);
+      memoryMain.appendChild(memoryTitle);
+      memoryMain.appendChild(memoryMeta);
+      memoryItem.appendChild(memoryMain);
+      panel.appendChild(memoryItem);
+    });
+
+    return panel;
+  }
+
+  function updateConfirmState() {
+    var beings = loadBeings();
+    var being = null;
+    if (selectedLinkBeingId) {
+      being = beings.filter(function (b) { return b.id === selectedLinkBeingId; })[0] || null;
+    }
+
+    if (selectedRecordNumber && being) {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "この記憶を、" + beingDisplayName(being) + "と共に持つ";
+    } else {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "この記憶を、Aquaと共に持つ";
+    }
+  }
+
+  confirmBtn.addEventListener("click", function () {
+    if (!selectedRecordNumber || !selectedLinkBeingId) return;
+
+    var companionships = loadCompanionships();
+    // 念のための最終確認: すでに結ばれている記録には、新しい関係を作らない
+    // （解除・上書きは今回実装しない）。
+    var already = companionships.some(function (c) { return c.beingLogRecordNumber === selectedRecordNumber; });
+    if (already) {
+      confirmMessageEl.textContent = "この記憶は、すでに別のAquaと共にあります。";
+      selectedRecordNumber = null;
+      selectedLinkBeingId = null;
+      render();
+      return;
+    }
+
+    var linkedBeing = loadBeings().filter(function (b) { return b.id === selectedLinkBeingId; })[0] || null;
+
+    companionships.push({
+      id: generateCompanionshipId(),
+      beingLogRecordNumber: selectedRecordNumber,
+      beingId: selectedLinkBeingId,
+      linkedAt: new Date().toISOString()
+    });
+    saveCompanionships(companionships);
+
+    // 「操作が完了した」ではなく「今、この関係がある」ことを伝える一文にする。
+    // Section1の「すでに別のAquaと共にあります」と同じ文型で揃える。
+    confirmMessageEl.textContent = linkedBeing
+      ? "この記憶は、" + beingDisplayName(linkedBeing) + "と共にあります。"
+      : "この記憶は、共にあります。";
+    selectedRecordNumber = null;
+    selectedLinkBeingId = null;
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

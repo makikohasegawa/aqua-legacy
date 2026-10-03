@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aquarium | Aqua Legacy</title>
+<style>
+  :root {
+    --aqua-deep: #1c4e63;
+    --aqua-mid: #3a7ca5;
+    --aqua-light: #cfe8f0;
+    --aqua-bg: #eef7fa;
+    --text-main: #1f2d33;
+    --text-sub: #5b6b70;
+    --panel-bg: #ffffff;
+    --panel-border: #dcebf0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: linear-gradient(180deg, var(--aqua-bg) 0%, #ffffff 60%);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px 80px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 960px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+    margin: 0 0 8px;
+    color: var(--aqua-deep);
+    letter-spacing: 0.05em;
+  }
+
+  header p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-sub);
+    line-height: 1.6;
+  }
+
+  .founder-forms {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .founder-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .founder-panel h2 {
+    font-size: 1rem;
+    margin: 0 0 16px;
+    color: var(--aqua-deep);
+  }
+
+  .fish-preview {
+    width: 100%;
+    aspect-ratio: 8 / 5;
+    background: linear-gradient(180deg, #eaf6fb 0%, #ffffff 100%);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .fish-preview svg {
+    width: 88%;
+    height: 88%;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field:last-child {
+    margin-bottom: 0;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    margin-bottom: 4px;
+  }
+
+  .field input[type="text"],
+  .field select {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    background: var(--aqua-bg);
+    color: var(--text-main);
+    font-family: inherit;
+  }
+
+  .field input[type="text"]:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--aqua-mid);
+  }
+
+  .actions {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  #confirmBtn {
+    padding: 12px 32px;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 24px;
+    background: var(--aqua-mid);
+    color: #ffffff;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+
+  #confirmBtn:hover {
+    background: var(--aqua-deep);
+  }
+
+  .hint {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-sub);
+  }
+
+  .saved-beings {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .saved-beings h2 {
+    font-size: 1rem;
+    margin: 0 0 12px;
+    color: var(--aqua-deep);
+  }
+
+  .saved-beings ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+
+  .saved-beings li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--panel-border);
+    color: var(--text-main);
+  }
+
+  .saved-beings li:last-child {
+    border-bottom: none;
+  }
+
+  .saved-beings .being-meta {
+    color: var(--text-sub);
+    font-size: 0.78rem;
+  }
+
+  .tank-section {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 32px;
+  }
+
+  .tank-section h2 {
+    font-size: 1rem;
+    margin: 0 0 16px;
+    color: var(--aqua-deep);
+  }
+
+  .tank-stage {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #bfe3ee 0%, #eaf6fb 60%, #f7fcfd 100%);
+    border: 1px solid var(--panel-border);
+  }
+
+  .tank-fish {
+    position: absolute;
+    left: 0;
+    width: 110px;
+  }
+
+  .tank-fish svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .tank-fish-label {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--aqua-deep);
+    margin-top: -4px;
+  }
+
+  /* 水平方向の位置と向きはJavaScript側のシミュレーションで管理する（DEC-0008）。
+     上下のゆらぎ（bob）だけは、引き続き演出的なCSSアニメーションとして扱う。 */
+  @keyframes swim-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>最初の3匹</h1>
+      <p>世界が始まるための3匹を、それぞれカスタマイズしてください。</p>
+    </header>
+
+    <div id="founderForms" class="founder-forms"></div>
+
+    <div class="actions">
+      <button id="confirmBtn" type="button">確定</button>
+      <p class="hint" id="confirmStatus">確定すると、3匹が同じ瞬間にBeingとして生成され、保存されます。</p>
+    </div>
+
+    <section class="saved-beings">
+      <h2>保存されているBeing</h2>
+      <div id="savedBeingsList"></div>
+      <p class="hint"><a href="#" id="resetLink">保存データをすべてリセットする（テスト用）</a></p>
+    </section>
+
+    <section class="tank-section">
+      <h2>水槽</h2>
+      <div id="tankStage" class="tank-stage"></div>
+    </section>
+
+    <section class="saved-beings">
+      <h2>最近のExperience</h2>
+      <div id="recentExperiencesList"></div>
+    </section>
+  </div>
+
+  <script>
+    // fishのnatureスキーマ（DEC-0007）
+    const GENDER_OPTIONS = [
+      { value: "male", label: "オス" },
+      { value: "female", label: "メス" },
+      { value: "random", label: "ランダム" }
+    ];
+
+    const BODY_COLOR_OPTIONS = [
+      { value: "red", label: "赤" },
+      { value: "orange", label: "オレンジ" },
+      { value: "yellow", label: "黄" },
+      { value: "green", label: "緑" },
+      { value: "turquoise", label: "ターコイズ" },
+      { value: "lightBlue", label: "水色" },
+      { value: "blue", label: "青" },
+      { value: "purple", label: "紫" },
+      { value: "pink", label: "ピンク" },
+      { value: "white", label: "白" },
+      { value: "black", label: "黒" },
+      { value: "brown", label: "茶" },
+      { value: "gold", label: "金" },
+      { value: "silver", label: "銀" }
+    ];
+
+    const PATTERN_OPTIONS = [
+      { value: "solid", label: "単色" },
+      { value: "gradient", label: "グラデーション" },
+      { value: "bicolor", label: "ツートン" },
+      { value: "marble", label: "マーブル" },
+      { value: "spots", label: "水玉" },
+      { value: "stripes", label: "縞" }
+    ];
+
+    const FIN_LENGTH_OPTIONS = [
+      { value: "short", label: "短い" },
+      { value: "medium", label: "普通" },
+      { value: "long", label: "長い" }
+    ];
+
+    const BODY_SHAPE_OPTIONS = [
+      { value: "slim", label: "スリム" },
+      { value: "standard", label: "標準" },
+      { value: "round", label: "丸型" }
+    ];
+
+    // 体型ごとの体（楕円）の縦横比（DEC-0007: bodyShapeは体の縦横比として表現する）
+    const BODY_SHAPE_DIMENSIONS = {
+      slim: { rx: 46, ry: 18 },
+      standard: { rx: 40, ry: 24 },
+      round: { rx: 32, ry: 30 }
+    };
+
+    // 鰭の長さに応じたスケール係数（DEC-0007: finLengthは鰭のパスの長さとして表現する）
+    const FIN_LENGTH_SCALE = {
+      short: 0.65,
+      medium: 1,
+      long: 1.5
+    };
+
+    // bodyColorの実際の色。gold/silverは単色ではなくグラデーションで表現するため、
+    // ここには含めず buildBodyFillDef 側で個別に扱う（DEC-0007）。
+    const COLOR_HEX = {
+      red: "#e2483d",
+      orange: "#f2924c",
+      yellow: "#f4d35e",
+      green: "#4f9d69",
+      turquoise: "#3fb8af",
+      lightBlue: "#8ecae6",
+      blue: "#3a7ca5",
+      purple: "#8e6bb0",
+      pink: "#e88fb0",
+      white: "#f5f5f0",
+      black: "#2b2b2b",
+      brown: "#8b5e3c"
+    };
+
+    // 世界の起源となる3匹の初期表示名。プレイヤーが自由に変更できる（DEC-0007）。
+    // 構造上はこの後生まれる他のBeingと完全に同一で、専用フィールドは持たない。
+    const INITIAL_FOUNDERS = [
+      { name: "Something Great" },
+      { name: "Adam" },
+      { name: "Eve" }
+    ];
+
+    const BEINGS_STORAGE_KEY = "aqualegacy_beings";
+
+    // この3枠が「どのBeingを指しているか」を覚えておくためだけのUI側の帳簿。
+    // Beingレコード自体には一切書き込まない（DEC-0007: 起源の3匹に専用フィールドは持たせない）。
+    const FOUNDER_SLOT_IDS_KEY = "aqualegacy_founder_slot_ids";
+
+    // ExperienceEntryの保存先。opportunityとresponseは常に一体で、
+    // 応答が実際に起きた瞬間にのみ保存する（DEC-0008）。
+    const EXPERIENCES_STORAGE_KEY = "aqualegacy_experiences";
+
+    // 水槽内での位置・向きは永続化しない、実行時だけの状態（DEC-0008）。
+    const FISH_WIDTH_PX = 110;
+    const WALL_MARGIN_PX = 10;
+    const BASE_SPEED_PX_PER_SEC = 18;
+
+    // 他のBeingとの「出会い」検知に使う二段階のしきい値（ヒステリシス、DEC-0009）。
+    // この距離より近づいたら出会ったと記録し、ENCOUNTER_EXIT_DISTANCE_PXより離れるまで再記録しない。
+    const ENCOUNTER_ENTER_DISTANCE_PX = 70;
+    const ENCOUNTER_EXIT_DISTANCE_PX = 110;
+
+    // ---- 色ユーティリティ ----
+
+    function hexToRgb(hex) {
+      const clean = hex.replace("#", "");
+      return {
+        r: parseInt(clean.substring(0, 2), 16),
+        g: parseInt(clean.substring(2, 4), 16),
+        b: parseInt(clean.substring(4, 6), 16)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      const toHex = function (n) {
+        return Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+      };
+      return "#" + toHex(r) + toHex(g) + toHex(b);
+    }
+
+    // percentが正なら白へ、負なら黒へ、その割合だけ近づけた色を返す
+    function shadeColor(hex, percent) {
+      const rgb = hexToRgb(hex);
+      const target = percent < 0 ? 0 : 255;
+      const ratio = Math.abs(percent) / 100;
+      return rgbToHex(
+        rgb.r + (target - rgb.r) * ratio,
+        rgb.g + (target - rgb.g) * ratio,
+        rgb.b + (target - rgb.b) * ratio
+      );
+    }
+
+    // ---- フォームUIの構築 ----
+
+    function buildSelect(id, options, defaultValue) {
+      const opts = options
+        .map(function (opt) {
+          const selected = opt.value === defaultValue ? " selected" : "";
+          return '<option value="' + opt.value + '"' + selected + ">" + opt.label + "</option>";
+        })
+        .join("");
+      return '<select id="' + id + '">' + opts + "</select>";
+    }
+
+    function buildFounderPanel(index, founder) {
+      const prefix = "founder" + index;
+      return (
+        '<div class="founder-panel" data-founder-index="' + index + '">' +
+          "<h2>" + (index + 1) + "匹目</h2>" +
+          '<div class="fish-preview" id="' + prefix + '-preview"></div>' +
+          '<div class="field">' +
+            '<label for="' + prefix + "-name" + '">名前</label>' +
+            '<input type="text" id="' + prefix + "-name" + '" value="' + founder.name + '">' +
+          "</div>" +
+          '<div class="field">' +
+            '<label for="' + prefix + "-gender" + '">性別</label>' +
+            buildSelect(prefix + "-gender", GENDER_OPTIONS, "random") +
+          "</div>" +
+          '<div class="field">' +
+            '<label for="' + prefix + "-bodyColor" + '">体色</label>' +
+            buildSelect(prefix + "-bodyColor", BODY_COLOR_OPTIONS, "orange") +
+          "</div>" +
+          '<div class="field">' +
+            '<label for="' + prefix + "-pattern" + '">柄</label>' +
+            buildSelect(prefix + "-pattern", PATTERN_OPTIONS, "solid") +
+          "</div>" +
+          '<div class="field">' +
+            '<label for="' + prefix + "-finLength" + '">鰭の長さ</label>' +
+            buildSelect(prefix + "-finLength", FIN_LENGTH_OPTIONS, "medium") +
+          "</div>" +
+          '<div class="field">' +
+            '<label for="' + prefix + "-bodyShape" + '">体型</label>' +
+            buildSelect(prefix + "-bodyShape", BODY_SHAPE_OPTIONS, "standard") +
+          "</div>" +
+        "</div>"
+      );
+    }
+
+    function renderFounderForms() {
+      const container = document.getElementById("founderForms");
+      container.innerHTML = INITIAL_FOUNDERS.map(function (founder, index) {
+        return buildFounderPanel(index, founder);
+      }).join("");
+    }
+
+    // ---- natureの読み出し ----
+
+    // gender:"random" はここでは確定しない（実際の確定はcreateFounderBeingsFromFormで行う）。
+    function currentNatureFromForm(index) {
+      const prefix = "founder" + index;
+      return {
+        gender: document.getElementById(prefix + "-gender").value,
+        bodyColor: document.getElementById(prefix + "-bodyColor").value,
+        pattern: document.getElementById(prefix + "-pattern").value,
+        finLength: document.getElementById(prefix + "-finLength").value,
+        bodyShape: document.getElementById(prefix + "-bodyShape").value
+      };
+    }
+
+    function readFounderFormValues() {
+      return INITIAL_FOUNDERS.map(function (_, index) {
+        const nature = currentNatureFromForm(index);
+        nature.name = document.getElementById("founder" + index + "-name").value;
+        return nature;
+      });
+    }
+
+    // 保存済みのBeingの値を、指定した枠のフォームに反映する（リロード時の復元用）
+    function populateFormFromBeing(index, being) {
+      const prefix = "founder" + index;
+      document.getElementById(prefix + "-name").value = being.name;
+      document.getElementById(prefix + "-gender").value = being.nature.gender;
+      document.getElementById(prefix + "-bodyColor").value = being.nature.bodyColor;
+      document.getElementById(prefix + "-pattern").value = being.nature.pattern;
+      document.getElementById(prefix + "-finLength").value = being.nature.finLength;
+      document.getElementById(prefix + "-bodyShape").value = being.nature.bodyShape;
+    }
+
+    // ---- 魚のSVG描画 ----
+
+    // 体の塗り。gold/silverは常にグラデーション（金属質感）。
+    // それ以外はpatternが"gradient"のときだけ、明暗のグラデーションを使う。
+    function buildBodyFillDef(uid, nature) {
+      if (nature.bodyColor === "gold" || nature.bodyColor === "silver") {
+        const stops =
+          nature.bodyColor === "gold"
+            ? ["#fdf1c6", "#e8a93b", "#fff6da", "#c9862a", "#fdf1c6"]
+            : ["#f4f4f4", "#b7b7b7", "#ffffff", "#8f8f8f", "#f4f4f4"];
+        const gradId = "metal-" + uid;
+        const stopsMarkup = stops
+          .map(function (color, i) {
+            const offset = Math.round((i / (stops.length - 1)) * 100);
+            return '<stop offset="' + offset + '%" stop-color="' + color + '" />';
+          })
+          .join("");
+        return {
+          defsMarkup: '<linearGradient id="' + gradId + '" x1="0%" y1="0%" x2="100%" y2="0%">' + stopsMarkup + "</linearGradient>",
+          fillRef: "url(#" + gradId + ")"
+        };
+      }
+
+      const baseHex = COLOR_HEX[nature.bodyColor];
+
+      if (nature.pattern === "gradient") {
+        const gradId = "grad-" + uid;
+        const light = shadeColor(baseHex, 30);
+        const dark = shadeColor(baseHex, -25);
+        return {
+          defsMarkup:
+            '<linearGradient id="' + gradId + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
+            '<stop offset="0%" stop-color="' + light + '" />' +
+            '<stop offset="100%" stop-color="' + dark + '" />' +
+            "</linearGradient>",
+          fillRef: "url(#" + gradId + ")"
+        };
+      }
+
+      return { defsMarkup: "", fillRef: baseHex };
+    }
+
+    // solid/gradient以外のpatternは、体の輪郭でクリップした重ね塗りとして表現する
+    function buildPatternOverlay(uid, nature, body) {
+      const baseHex = nature.bodyColor === "gold" || nature.bodyColor === "silver" ? "#c9a227" : COLOR_HEX[nature.bodyColor];
+      const accent = shadeColor(baseHex, -35);
+      const clipId = "clip-" + uid;
+      const clipDef =
+        '<clipPath id="' + clipId + '"><ellipse cx="' + body.cx + '" cy="' + body.cy + '" rx="' + body.rx + '" ry="' + body.ry + '" /></clipPath>';
+
+      if (nature.pattern === "bicolor") {
+        const overlayMarkup =
+          '<rect x="' + body.cx + '" y="' + (body.cy - body.ry) + '" width="' + body.rx + '" height="' + body.ry * 2 +
+          '" fill="' + accent + '" clip-path="url(#' + clipId + ')" />';
+        return { defsMarkup: clipDef, overlayMarkup: overlayMarkup };
+      }
+
+      if (nature.pattern === "spots") {
+        const spotPositions = [
+          { dx: -0.35, dy: -0.3, r: 0.14 },
+          { dx: 0.1, dy: 0.35, r: 0.16 },
+          { dx: 0.4, dy: -0.1, r: 0.12 },
+          { dx: -0.05, dy: -0.05, r: 0.1 }
+        ];
+        const overlayMarkup = spotPositions
+          .map(function (spot) {
+            return (
+              '<circle cx="' + (body.cx + body.rx * spot.dx) + '" cy="' + (body.cy + body.ry * spot.dy) +
+              '" r="' + body.ry * spot.r + '" fill="' + accent + '" clip-path="url(#' + clipId + ')" />'
+            );
+          })
+          .join("");
+        return { defsMarkup: clipDef, overlayMarkup: overlayMarkup };
+      }
+
+      if (nature.pattern === "stripes") {
+        const stripeCount = 5;
+        const stripes = [];
+        for (let i = 0; i < stripeCount; i++) {
+          const x = body.cx - body.rx + (i * (body.rx * 2)) / (stripeCount - 1);
+          stripes.push(
+            '<rect x="' + (x - 4) + '" y="' + (body.cy - body.ry) + '" width="8" height="' + body.ry * 2 +
+            '" fill="' + accent + '" opacity="0.6" transform="skewX(-15)" clip-path="url(#' + clipId + ')" />'
+          );
+        }
+        return { defsMarkup: clipDef, overlayMarkup: stripes.join("") };
+      }
+
+      if (nature.pattern === "marble") {
+        const filterId = "marble-" + uid;
+        const filterDef =
+          '<filter id="' + filterId + '">' +
+          '<feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="' + (uid.length + 3) + '" result="noise" />' +
+          '<feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0" />' +
+          "</filter>";
+        const overlayMarkup =
+          '<ellipse cx="' + body.cx + '" cy="' + body.cy + '" rx="' + body.rx + '" ry="' + body.ry +
+          '" fill="' + accent + '" filter="url(#' + filterId + ')" clip-path="url(#' + clipId + ')" />';
+        return { defsMarkup: clipDef + filterDef, overlayMarkup: overlayMarkup };
+      }
+
+      // solid / gradient は重ね塗りなし
+      return { defsMarkup: clipDef, overlayMarkup: "" };
+    }
+
+    function buildFishSvgMarkup(uid, nature) {
+      const dims = BODY_SHAPE_DIMENSIONS[nature.bodyShape];
+      const finScale = FIN_LENGTH_SCALE[nature.finLength];
+      const body = { cx: 58, cy: 52, rx: dims.rx, ry: dims.ry };
+
+      const bodyFill = buildBodyFillDef(uid, nature);
+      const overlay = buildPatternOverlay(uid, nature, body);
+
+      const tailBaseX = body.cx + body.rx;
+      const tailLength = 26 * finScale;
+      const tailFlare = 16 * finScale;
+      const tailPath =
+        "M " + tailBaseX + " " + (body.cy - tailFlare) +
+        " L " + (tailBaseX + tailLength) + " " + body.cy +
+        " L " + tailBaseX + " " + (body.cy + tailFlare) + " Z";
+
+      const dorsalHeight = 12 * finScale;
+      const dorsalPath =
+        "M " + (body.cx - 6) + " " + (body.cy - body.ry) +
+        " L " + body.cx + " " + (body.cy - body.ry - dorsalHeight) +
+        " L " + (body.cx + 10) + " " + (body.cy - body.ry * 0.6) + " Z";
+
+      const pectoralLength = 12 * finScale;
+      const pectoralPath =
+        "M " + (body.cx - body.rx * 0.1) + " " + (body.cy + body.ry * 0.5) +
+        " L " + (body.cx - body.rx * 0.1 - pectoralLength * 0.4) + " " + (body.cy + body.ry * 0.5 + pectoralLength) +
+        " L " + (body.cx + body.rx * 0.25) + " " + (body.cy + body.ry * 0.7) + " Z";
+
+      const finBaseColor = nature.bodyColor === "gold" || nature.bodyColor === "silver" ? "#c9a227" : COLOR_HEX[nature.bodyColor];
+      const finColor = shadeColor(finBaseColor, -15);
+
+      const eyeX = body.cx - body.rx * 0.6;
+      const eyeY = body.cy - body.ry * 0.15;
+      const eyeR = body.ry * 0.14;
+
+      return (
+        '<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">' +
+          "<defs>" + bodyFill.defsMarkup + overlay.defsMarkup + "</defs>" +
+          '<path d="' + tailPath + '" fill="' + finColor + '" opacity="0.85" />' +
+          '<path d="' + dorsalPath + '" fill="' + finColor + '" opacity="0.85" />' +
+          '<path d="' + pectoralPath + '" fill="' + finColor + '" opacity="0.75" />' +
+          '<ellipse cx="' + body.cx + '" cy="' + body.cy + '" rx="' + body.rx + '" ry="' + body.ry + '" fill="' + bodyFill.fillRef + '" />' +
+          overlay.overlayMarkup +
+          '<circle cx="' + eyeX + '" cy="' + eyeY + '" r="' + eyeR + '" fill="#22303a" />' +
+          '<circle cx="' + (eyeX + eyeR * 0.3) + '" cy="' + (eyeY - eyeR * 0.3) + '" r="' + eyeR * 0.35 + '" fill="#ffffff" opacity="0.8" />' +
+        "</svg>"
+      );
+    }
+
+    // ---- プレビューの更新 ----
+
+    function updateFounderPreview(index) {
+      const nature = currentNatureFromForm(index);
+      const uid = "f" + index;
+      const preview = document.getElementById("founder" + index + "-preview");
+      preview.innerHTML = buildFishSvgMarkup(uid, nature);
+    }
+
+    function updateAllPreviews() {
+      INITIAL_FOUNDERS.forEach(function (_, index) {
+        updateFounderPreview(index);
+      });
+    }
+
+    function attachPreviewListeners() {
+      const watchedFields = ["gender", "bodyColor", "pattern", "finLength", "bodyShape"];
+      INITIAL_FOUNDERS.forEach(function (_, index) {
+        const prefix = "founder" + index;
+        watchedFields.forEach(function (field) {
+          document.getElementById(prefix + "-" + field).addEventListener("change", function () {
+            updateFounderPreview(index);
+          });
+        });
+      });
+    }
+
+    // ---- Beingの生成と永続化 ----
+
+    function generateId() {
+      if (typeof crypto !== "undefined" && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    // "random"はUI上の入力補助であり、natureにはこの関数で確定した値のみを保存する（DEC-0007）
+    function resolveGender(genderValue) {
+      if (genderValue === "random") {
+        return Math.random() < 0.5 ? "male" : "female";
+      }
+      return genderValue;
+    }
+
+    function loadBeings() {
+      try {
+        const raw = localStorage.getItem(BEINGS_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveBeings(beings) {
+      localStorage.setItem(BEINGS_STORAGE_KEY, JSON.stringify(beings));
+    }
+
+    function loadFounderSlotIds() {
+      try {
+        const raw = localStorage.getItem(FOUNDER_SLOT_IDS_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveFounderSlotIds(ids) {
+      localStorage.setItem(FOUNDER_SLOT_IDS_KEY, JSON.stringify(ids));
+    }
+
+    // id・type・birth・name・natureを一つの原子的な操作として確定する（DEC-0007）。
+    // 3匹は同じ生成操作の中で、同じbirthを持って生まれる。
+    function createFounderBeingsFromForm() {
+      const birth = new Date().toISOString();
+      return readFounderFormValues().map(function (values) {
+        return {
+          id: generateId(),
+          type: "fish",
+          birth: birth,
+          name: values.name,
+          nature: {
+            gender: resolveGender(values.gender),
+            bodyColor: values.bodyColor,
+            pattern: values.pattern,
+            finLength: values.finLength,
+            bodyShape: values.bodyShape
+          }
+        };
+      });
+    }
+
+    // ページを開いた時点で、すでに起源の3匹が存在するなら、フォームをその内容で復元する。
+    // （リロードのたびにフォームが初期設定へ戻ってしまう問題への対応）
+    function restoreFounderFormIfExists() {
+      const slotIds = loadFounderSlotIds();
+      if (!slotIds || slotIds.length !== INITIAL_FOUNDERS.length) {
+        return false;
+      }
+      const beings = loadBeings();
+      const founders = slotIds.map(function (id) {
+        return beings.find(function (b) { return b.id === id; });
+      });
+      if (founders.some(function (f) { return !f; })) {
+        // 保存されているはずのBeingが見つからない場合は、初期設定のまま諦める
+        return false;
+      }
+      founders.forEach(function (being, index) {
+        populateFormFromBeing(index, being);
+      });
+      return true;
+    }
+
+    function updateConfirmButtonLabel() {
+      const exists = !!loadFounderSlotIds();
+      document.getElementById("confirmBtn").textContent = exists ? "この内容で作り直す" : "確定";
+    }
+
+    function renderSavedBeingsList() {
+      const beings = loadBeings();
+      const listEl = document.getElementById("savedBeingsList");
+      if (beings.length === 0) {
+        listEl.innerHTML = '<p class="hint">まだ何も保存されていません。</p>';
+        return;
+      }
+      listEl.innerHTML =
+        "<ul>" +
+        beings
+          .map(function (being) {
+            return (
+              "<li><strong>" + being.name + "</strong> (" + being.nature.gender + " / " + being.type + ")" +
+              '<br><span class="being-meta">' +
+              being.nature.bodyColor + " / " + being.nature.pattern + " / " + being.nature.finLength + " / " + being.nature.bodyShape +
+              "<br>id: " + being.id + " / birth: " + being.birth +
+              "</span></li>"
+            );
+          })
+          .join("") +
+        "</ul>";
+    }
+
+    // ---- Experienceの永続化 ----
+
+    function loadExperiences() {
+      try {
+        const raw = localStorage.getItem(EXPERIENCES_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveExperiences(experiences) {
+      localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
+    }
+
+    // opportunity/responseの組み合わせから、表示用の説明文を導出する。
+    // 「出会った」のような物語的な意味づけは、ここでだけ生成し、データとしては保存しない（DEC-0009）。
+    function describeExperience(entry, beings) {
+      const being = beings.find(function (b) { return b.id === entry.beingId; });
+      const name = being ? being.name : entry.beingId;
+
+      if (entry.opportunity.type === "wall_nearby" && entry.response.type === "turn") {
+        return (
+          name + " — " + entry.opportunity.side + "の壁に近づき、" +
+          entry.response.from + "から" + entry.response.to + "へ向きを変えた"
+        );
+      }
+
+      if (entry.opportunity.type === "being_nearby" && entry.response.type === "acknowledge") {
+        const other = beings.find(function (b) { return b.id === entry.opportunity.withBeingId; });
+        const otherName = other ? other.name : entry.opportunity.withBeingId;
+        return name + " — " + otherName + " と出会った";
+      }
+
+      return name + " — 何かが起きた（" + entry.opportunity.type + " / " + entry.response.type + "）";
+    }
+
+    function renderRecentExperiences() {
+      const listEl = document.getElementById("recentExperiencesList");
+      if (!listEl) {
+        return;
+      }
+      const experiences = loadExperiences();
+      if (experiences.length === 0) {
+        listEl.innerHTML = '<p class="hint">まだ何も記録されていません。壁に近づいて向きを変えたり、他のBeingと出会ったりすると、ここに記録されます。</p>';
+        return;
+      }
+      const beings = loadBeings();
+      const recent = experiences.slice(-8).reverse();
+      listEl.innerHTML =
+        "<ul>" +
+        recent
+          .map(function (entry) {
+            return (
+              "<li>" + describeExperience(entry, beings) +
+              '<br><span class="being-meta">' + entry.timestamp + "</span></li>"
+            );
+          })
+          .join("") +
+        "</ul>";
+    }
+
+    // ---- 水槽（位置・向きのシミュレーションと、壁へのWill/Response） ----
+
+    let tankFishStates = []; // 永続化しない、実行時だけの状態（DEC-0008）
+    let tankAnimationHandle = null;
+    let tankAnimationLastTs = null;
+
+    // 現在「出会い」の範囲内にあるペアを覚えておくための帳簿。永続化しない（DEC-0009）。
+    // 距離が離れて範囲外になるまでは、同じ出会いとして再記録しない。
+    let encounterPairsInProgress = new Set();
+
+    function pairKey(idA, idB) {
+      return idA < idB ? idA + "|" + idB : idB + "|" + idA;
+    }
+
+    function buildTankFishElement(being, uid) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "tank-fish";
+
+      const flip = document.createElement("div");
+      flip.className = "tank-fish-flip";
+
+      const bob = document.createElement("div");
+      bob.className = "tank-fish-bob";
+      bob.style.animation = "swim-bob " + (2 + Math.random() * 1.5).toFixed(2) + "s ease-in-out infinite";
+      bob.innerHTML = buildFishSvgMarkup(uid, being.nature);
+
+      flip.appendChild(bob);
+
+      const label = document.createElement("div");
+      label.className = "tank-fish-label";
+      label.textContent = being.name;
+
+      wrapper.appendChild(flip);
+      wrapper.appendChild(label);
+
+      return { wrapper: wrapper, flip: flip };
+    }
+
+    // fishのSVGは元々、頭が左（低いx）・尾が右（高いx）を向くように描かれている。
+    // つまり無反転（scaleX(1)）で「左向き」、反転（scaleX(-1)）で「右向き」になる。
+    function applyFacingDirection(flipEl, direction) {
+      flipEl.style.transform = direction === "right" ? "scaleX(-1)" : "scaleX(1)";
+    }
+
+    // 「壁が近い」がOpportunity、「向きを変える」がResponse。
+    // 応答が実際に起きた瞬間にのみ、OpportunityとResponseを一体のExperienceEntryとして保存する（DEC-0008）。
+    // ここでの「必ず向きを変える」という規則は、Willの中身の実装ではなく、
+    // Opportunity検出→Response発生→Experience記録、という経路そのものの最小実装として扱う。
+    function respondToWall(fish, side) {
+      const fromDirection = fish.direction;
+      const toDirection = fromDirection === "right" ? "left" : "right";
+
+      fish.direction = toDirection;
+      applyFacingDirection(fish.flip, toDirection);
+
+      const entry = {
+        id: generateId(),
+        beingId: fish.being.id,
+        opportunity: { type: "wall_nearby", side: side },
+        response: { type: "turn", from: fromDirection, to: toDirection },
+        timestamp: new Date().toISOString()
+      };
+
+      const experiences = loadExperiences();
+      experiences.push(entry);
+      saveExperiences(experiences);
+
+      renderRecentExperiences();
+    }
+
+    // 「近くに他のBeingがいる」がOpportunity、「相手の存在を認識し、その気づきを留めた」がResponse（DEC-0009）。
+    // 「出会った」という物語的な意味づけはここでは記録せず、表示側（describeExperience）で導出する。
+    // 出会いは共有の1レコードではなく、当事者それぞれの視点で、独立した2件のExperienceEntryとして保存する。
+    function respondToEncounter(fishA, fishB) {
+      const timestamp = new Date().toISOString();
+
+      const entryForA = {
+        id: generateId(),
+        beingId: fishA.being.id,
+        opportunity: { type: "being_nearby", withBeingId: fishB.being.id },
+        response: { type: "acknowledge", withBeingId: fishB.being.id },
+        timestamp: timestamp
+      };
+      const entryForB = {
+        id: generateId(),
+        beingId: fishB.being.id,
+        opportunity: { type: "being_nearby", withBeingId: fishA.being.id },
+        response: { type: "acknowledge", withBeingId: fishA.being.id },
+        timestamp: timestamp
+      };
+
+      const experiences = loadExperiences();
+      experiences.push(entryForA, entryForB);
+      saveExperiences(experiences);
+
+      renderRecentExperiences();
+    }
+
+    // Being同士の距離を確認し、ヒステリシスに基づいて出会いを検知する。
+    // 範囲に入った瞬間だけ記録し、範囲外に出るまでは同じ出会いとして再記録しない（DEC-0009）。
+    function checkEncounters() {
+      for (let i = 0; i < tankFishStates.length; i++) {
+        for (let j = i + 1; j < tankFishStates.length; j++) {
+          const fishA = tankFishStates[i];
+          const fishB = tankFishStates[j];
+          const key = pairKey(fishA.being.id, fishB.being.id);
+
+          const dx = (fishA.x + FISH_WIDTH_PX / 2) - (fishB.x + FISH_WIDTH_PX / 2);
+          const dy = fishA.y - fishB.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          const alreadyInProgress = encounterPairsInProgress.has(key);
+
+          if (!alreadyInProgress && distance <= ENCOUNTER_ENTER_DISTANCE_PX) {
+            encounterPairsInProgress.add(key);
+            respondToEncounter(fishA, fishB);
+          } else if (alreadyInProgress && distance >= ENCOUNTER_EXIT_DISTANCE_PX) {
+            encounterPairsInProgress.delete(key);
+          }
+        }
+      }
+    }
+
+    function stepFish(fish, deltaSec, tankWidthPx) {
+      const dx = (fish.direction === "right" ? 1 : -1) * fish.speed * deltaSec;
+      fish.x += dx;
+
+      const maxX = Math.max(0, tankWidthPx - FISH_WIDTH_PX);
+      fish.x = Math.max(0, Math.min(maxX, fish.x));
+
+      // 壁への接近は、その壁に向かって進んでいるときだけOpportunityとして扱う。
+      // （壁の近くに留まっている間、毎フレーム反応し続けてしまうのを防ぐため）
+      const nearRightWall = fish.direction === "right" && fish.x >= maxX - WALL_MARGIN_PX;
+      const nearLeftWall = fish.direction === "left" && fish.x <= WALL_MARGIN_PX;
+
+      if (nearRightWall || nearLeftWall) {
+        respondToWall(fish, nearRightWall ? "right" : "left");
+      }
+
+      fish.wrapper.style.transform = "translateX(" + fish.x + "px)";
+    }
+
+    function stopTankSimulation() {
+      if (tankAnimationHandle !== null) {
+        cancelAnimationFrame(tankAnimationHandle);
+        tankAnimationHandle = null;
+      }
+      tankAnimationLastTs = null;
+    }
+
+    function startTankSimulation(tankWidthPx) {
+      function tick(ts) {
+        if (tankAnimationLastTs === null) {
+          tankAnimationLastTs = ts;
+        }
+        const deltaSec = Math.min(0.1, (ts - tankAnimationLastTs) / 1000);
+        tankAnimationLastTs = ts;
+
+        tankFishStates.forEach(function (fish) {
+          stepFish(fish, deltaSec, tankWidthPx);
+        });
+        checkEncounters();
+
+        tankAnimationHandle = requestAnimationFrame(tick);
+      }
+      tankAnimationHandle = requestAnimationFrame(tick);
+    }
+
+    function renderTank() {
+      const beings = loadBeings();
+      const tank = document.getElementById("tankStage");
+
+      stopTankSimulation();
+      tank.innerHTML = "";
+      tankFishStates = [];
+      encounterPairsInProgress = new Set();
+
+      if (beings.length === 0) {
+        tank.innerHTML = '<p class="hint">水槽にはまだ誰もいません。</p>';
+        return;
+      }
+
+      const tankWidthPx = tank.clientWidth || 800;
+      const tankHeightPx = tank.clientHeight || 280;
+      const maxX = Math.max(0, tankWidthPx - FISH_WIDTH_PX);
+      const maxY = Math.max(0, tankHeightPx - 60);
+
+      beings.forEach(function (being, index) {
+        const uid = "tank" + index;
+        const elements = buildTankFishElement(being, uid);
+        tank.appendChild(elements.wrapper);
+
+        const startX = Math.random() * maxX;
+        const startY = 8 + Math.random() * maxY;
+        const direction = Math.random() < 0.5 ? "left" : "right";
+
+        elements.wrapper.style.top = startY + "px";
+        elements.wrapper.style.transform = "translateX(" + startX + "px)";
+        applyFacingDirection(elements.flip, direction);
+
+        tankFishStates.push({
+          being: being,
+          wrapper: elements.wrapper,
+          flip: elements.flip,
+          x: startX,
+          y: startY,
+          direction: direction,
+          speed: BASE_SPEED_PX_PER_SEC * (0.7 + Math.random() * 0.6)
+        });
+      });
+
+      startTankSimulation(tankWidthPx);
+    }
+
+    document.getElementById("confirmBtn").addEventListener("click", function () {
+      const newBeings = createFounderBeingsFromForm();
+      const existingSlotIds = loadFounderSlotIds();
+
+      // すでに起源の3匹が存在する場合は、古い3匹を取り除いてから新しい3匹に置き換える。
+      // （重複して増え続けないようにするため）
+      let beings = loadBeings();
+      if (existingSlotIds) {
+        beings = beings.filter(function (b) {
+          return existingSlotIds.indexOf(b.id) === -1;
+        });
+      }
+      beings = beings.concat(newBeings);
+      saveBeings(beings);
+      saveFounderSlotIds(newBeings.map(function (b) { return b.id; }));
+
+      console.log("founder beings", newBeings);
+
+      const status = document.getElementById("confirmStatus");
+      status.textContent =
+        "3匹を同じ瞬間（" + newBeings[0].birth + "）に世界へ送り出しました。";
+
+      updateConfirmButtonLabel();
+      renderSavedBeingsList();
+      renderTank();
+      renderRecentExperiences();
+    });
+
+    // テスト用のリセット。保存データ（Being本体・founder slotの帳簿・Experienceの全て）を消し、
+    // フォーム・一覧・水槽を初期状態に戻す。
+    document.getElementById("resetLink").addEventListener("click", function (event) {
+      event.preventDefault();
+      const confirmed = window.confirm("保存されているBeing・Experience・起源の記録をすべて削除します。よろしいですか？");
+      if (!confirmed) {
+        return;
+      }
+      localStorage.removeItem(BEINGS_STORAGE_KEY);
+      localStorage.removeItem(FOUNDER_SLOT_IDS_KEY);
+      localStorage.removeItem(EXPERIENCES_STORAGE_KEY);
+
+      renderFounderForms();
+      attachPreviewListeners();
+      updateAllPreviews();
+      updateConfirmButtonLabel();
+      renderSavedBeingsList();
+      renderTank();
+      renderRecentExperiences();
+
+      document.getElementById("confirmStatus").textContent =
+        "確定すると、3匹が同じ瞬間にBeingとして生成され、保存されます。";
+    });
+
+    renderFounderForms();
+    attachPreviewListeners();
+    restoreFounderFormIfExists();
+    updateAllPreviews();
+    updateConfirmButtonLabel();
+    renderSavedBeingsList();
+    renderTank();
+    renderRecentExperiences();
+  </script>
+</body>
+</html>

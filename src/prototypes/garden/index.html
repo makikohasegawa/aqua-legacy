@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>心の庭 — 希望のカケラ（実験）</title>
+<style>
+  :root {
+    --aqua-deep: #1c4e63;
+    --aqua-mid: #3a7ca5;
+    --aqua-light: #cfe8f0;
+    --aqua-bg: #eef7fa;
+    --text-main: #1f2d33;
+    --text-sub: #5b6b70;
+    --hope-gold: #cda86a;
+    --hope-gold-bright: #f2dba6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: linear-gradient(180deg, var(--aqua-bg) 0%, #ffffff 60%);
+    color: var(--text-main);
+  }
+
+  header {
+    padding: 28px 24px 12px;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--aqua-deep);
+    letter-spacing: 0.02em;
+  }
+  header p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.7;
+  }
+
+  .layout {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 12px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .candidates {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--aqua-light);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+  .candidates h2 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: var(--aqua-deep);
+    font-weight: 600;
+  }
+  .candidates .empty {
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.8;
+  }
+  .candidate-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(58, 124, 165, 0.12);
+  }
+  .candidate-item:last-child { border-bottom: none; }
+  .candidate-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-main);
+  }
+  .candidate-date {
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 2px;
+  }
+  .candidate-btn {
+    flex-shrink: 0;
+    background: var(--aqua-deep);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .candidate-btn:hover { background: var(--aqua-mid); }
+
+  .placement-hint {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: rgba(205, 168, 106, 0.16);
+    border: 1px solid rgba(205, 168, 106, 0.4);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--aqua-deep);
+  }
+  .placement-hint.active { display: flex; }
+  .placement-hint button {
+    background: none;
+    border: none;
+    color: var(--text-sub);
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .garden {
+    position: relative;
+    width: 100%;
+    height: 460px;
+    border-radius: 20px;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 20%, rgba(207, 232, 240, 0.6), transparent 65%),
+      linear-gradient(180deg, #f5fbfd 0%, #e7f3f6 100%);
+    border: 1px solid var(--aqua-light);
+    overflow: hidden;
+    cursor: default;
+  }
+  .garden.placing { cursor: crosshair; }
+  .garden-empty-note {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.9;
+    pointer-events: none;
+  }
+
+  .fragment {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin-left: -8px;
+    margin-top: -8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--hope-gold-bright) 0%, var(--hope-gold) 55%, rgba(205, 168, 106, 0) 75%);
+    box-shadow: 0 0 14px rgba(205, 168, 106, 0.55);
+    cursor: pointer;
+    animation: fragment-glow 4.5s ease-in-out infinite;
+  }
+  .fragment:nth-child(3n) { animation-delay: -1.2s; }
+  .fragment:nth-child(3n+1) { animation-delay: -2.6s; }
+  @keyframes fragment-glow {
+    0%, 100% { opacity: 0.75; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+
+  .fragment-card {
+    position: absolute;
+    z-index: 20;
+    max-width: 240px;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid var(--aqua-light);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text-main);
+    box-shadow: 0 8px 24px rgba(28, 78, 99, 0.18);
+    display: none;
+  }
+  .fragment-card.visible { display: block; }
+  .fragment-card .fc-date {
+    font-size: 10px;
+    color: var(--text-sub);
+    margin-bottom: 4px;
+  }
+  .fragment-card .fc-close {
+    display: block;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--aqua-mid);
+    cursor: pointer;
+    text-align: right;
+  }
+
+  .footnote {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    opacity: 0.75;
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>心の庭 — 希望のカケラ（実験）</h1>
+    <p>これは最小の実験です。Being Logの記録・水槽（aquarium）のいずれにも手を加えていません。</p>
+  </header>
+
+  <div class="layout">
+    <div class="candidates" id="candidates">
+      <h2>希望のカケラの候補</h2>
+      <div id="candidateList"></div>
+    </div>
+
+    <div class="placement-hint" id="placementHint">
+      <span>庭の好きな場所をクリックして、置く場所を選んでください。</span>
+      <button id="cancelPlacement">やめる</button>
+    </div>
+
+    <div class="garden" id="garden">
+      <div class="garden-empty-note" id="gardenEmptyNote"></div>
+    </div>
+
+    <div class="fragment-card" id="fragmentCard"></div>
+
+    <p class="footnote">
+      希望のカケラは、報酬でもポイントでも達成でもありません。<br />
+      見つけたから、記録した。記録したから、ここに置ける。それだけです。
+    </p>
+  </div>
+
+<script>
+  var BEING_LOG_STORAGE_KEY = "aqualegacy_being_log_entries"; // 読み取り専用。ここからは一切書き込まない。
+  var GARDEN_STORAGE_KEY = "aqualegacy_garden_fragments";
+
+  function loadBeingLogEntries() {
+    try {
+      var raw = localStorage.getItem(BEING_LOG_STORAGE_KEY);
+      var entries = raw ? JSON.parse(raw) : [];
+      return Array.isArray(entries) ? entries : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function loadFragments() {
+    try {
+      var raw = localStorage.getItem(GARDEN_STORAGE_KEY);
+      var fragments = raw ? JSON.parse(raw) : [];
+      return Array.isArray(fragments) ? fragments : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveFragments(fragments) {
+    localStorage.setItem(GARDEN_STORAGE_KEY, JSON.stringify(fragments));
+  }
+
+  function generateFragmentId() {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return "hope-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function formatDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var m = d.getMonth() + 1, day = d.getDate(), y = d.getFullYear();
+    return y + "/" + m + "/" + day;
+  }
+
+  var candidateListEl = document.getElementById("candidateList");
+  var candidatesEl = document.getElementById("candidates");
+  var placementHintEl = document.getElementById("placementHint");
+  var cancelPlacementBtn = document.getElementById("cancelPlacement");
+  var gardenEl = document.getElementById("garden");
+  var gardenEmptyNoteEl = document.getElementById("gardenEmptyNote");
+  var fragmentCardEl = document.getElementById("fragmentCard");
+
+  var selectedEntryId = null; // 「これは希望だった」と選ばれ、まだ庭に置かれていないエントリーのid
+
+  function entriesWithId(entries) {
+    // DEC-0011: idを持つのは、この変更より後に作られた新しいBeing Logの記録だけ。
+    // 過去の記録に遡ってidを振り直すことはしていない。
+    return entries.filter(function (e) { return e && typeof e.id === "string" && e.id; });
+  }
+
+  function render() {
+    var beingLogEntries = entriesWithId(loadBeingLogEntries());
+    var fragments = loadFragments();
+    var usedEntryIds = {};
+    fragments.forEach(function (f) { usedEntryIds[f.beingLogEntryId] = true; });
+
+    renderCandidates(beingLogEntries, usedEntryIds);
+    renderGarden(fragments, beingLogEntries);
+    updatePlacementHint();
+  }
+
+  function renderCandidates(beingLogEntries, usedEntryIds) {
+    candidateListEl.innerHTML = "";
+    var pending = beingLogEntries.filter(function (e) { return !usedEntryIds[e.id]; });
+
+    if (loadBeingLogEntries().length === 0) {
+      candidateListEl.innerHTML = '<p class="empty">Being Logにはまだ記録がありません。まずBeing Logで、今日の小さな気づきを記録してみてください。</p>';
+      return;
+    }
+    if (beingLogEntries.length === 0) {
+      candidateListEl.innerHTML = '<p class="empty">Being Logの記録はありますが、この庭の候補にできるのは、この機能を追加した後に新しく書かれた記録だけです。過去の記録は、そのままBeing Logの中で大切に残っています。新しく一つ、記録してみてください。</p>';
+      return;
+    }
+    if (pending.length === 0) {
+      candidateListEl.innerHTML = '<p class="empty">今のところ、すべての候補がすでに庭に置かれています。新しい気づきをBeing Logに記録すると、ここに候補として現れます。</p>';
+      return;
+    }
+
+    pending
+      .slice()
+      .reverse()
+      .forEach(function (entry) {
+        var item = document.createElement("div");
+        item.className = "candidate-item";
+
+        var left = document.createElement("div");
+        var text = document.createElement("div");
+        text.className = "candidate-text";
+        text.textContent = entry.text;
+        var date = document.createElement("div");
+        date.className = "candidate-date";
+        date.textContent = formatDate(entry.createdAt);
+        left.appendChild(text);
+        left.appendChild(date);
+
+        var btn = document.createElement("button");
+        btn.className = "candidate-btn";
+        btn.textContent = "これは希望だった";
+        btn.addEventListener("click", function () {
+          selectedEntryId = entry.id;
+          updatePlacementHint();
+        });
+
+        item.appendChild(left);
+        item.appendChild(btn);
+        candidateListEl.appendChild(item);
+      });
+  }
+
+  function updatePlacementHint() {
+    if (selectedEntryId) {
+      placementHintEl.classList.add("active");
+      gardenEl.classList.add("placing");
+    } else {
+      placementHintEl.classList.remove("active");
+      gardenEl.classList.remove("placing");
+    }
+  }
+
+  cancelPlacementBtn.addEventListener("click", function () {
+    selectedEntryId = null;
+    updatePlacementHint();
+  });
+
+  function renderGarden(fragments, beingLogEntries) {
+    // 既存のfragment要素だけを取り除く（空メッセージ要素は残す）
+    Array.prototype.slice.call(gardenEl.querySelectorAll(".fragment")).forEach(function (el) {
+      el.remove();
+    });
+
+    if (fragments.length === 0) {
+      gardenEmptyNoteEl.textContent = "まだ何も置かれていません。見つけた希望を、好きな場所に置いてみてください。";
+      gardenEmptyNoteEl.style.display = "flex";
+    } else {
+      gardenEmptyNoteEl.style.display = "none";
+    }
+
+    var entryById = {};
+    beingLogEntries.forEach(function (e) { entryById[e.id] = e; });
+
+    fragments.forEach(function (fragment) {
+      var dot = document.createElement("div");
+      dot.className = "fragment";
+      dot.style.left = fragment.x + "%";
+      dot.style.top = fragment.y + "%";
+      dot.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        showFragmentCard(fragment, entryById[fragment.beingLogEntryId], ev.clientX, ev.clientY);
+      });
+      gardenEl.appendChild(dot);
+    });
+  }
+
+  function showFragmentCard(fragment, entry, clientX, clientY) {
+    fragmentCardEl.innerHTML = "";
+    var dateEl = document.createElement("div");
+    dateEl.className = "fc-date";
+    dateEl.textContent = entry ? formatDate(entry.createdAt) : formatDate(fragment.placedAt);
+    var textEl = document.createElement("div");
+    textEl.textContent = entry ? entry.text : "（元の記録が見つかりませんでした）";
+    var closeEl = document.createElement("span");
+    closeEl.className = "fc-close";
+    closeEl.textContent = "閉じる";
+    closeEl.addEventListener("click", function () {
+      fragmentCardEl.classList.remove("visible");
+    });
+
+    fragmentCardEl.appendChild(dateEl);
+    fragmentCardEl.appendChild(textEl);
+    fragmentCardEl.appendChild(closeEl);
+
+    var top = clientY + window.scrollY + 16;
+    var left = Math.min(clientX + window.scrollX + 12, window.innerWidth - 260);
+    fragmentCardEl.style.top = top + "px";
+    fragmentCardEl.style.left = Math.max(left, 12) + "px";
+    fragmentCardEl.classList.add("visible");
+  }
+
+  gardenEl.addEventListener("click", function (ev) {
+    if (!selectedEntryId) return;
+    if (ev.target.classList.contains("fragment")) return;
+
+    var rect = gardenEl.getBoundingClientRect();
+    var xPercent = ((ev.clientX - rect.left) / rect.width) * 100;
+    var yPercent = ((ev.clientY - rect.top) / rect.height) * 100;
+    xPercent = Math.max(2, Math.min(98, xPercent));
+    yPercent = Math.max(2, Math.min(98, yPercent));
+
+    var fragments = loadFragments();
+    fragments.push({
+      id: generateFragmentId(),
+      beingLogEntryId: selectedEntryId,
+      x: xPercent,
+      y: yPercent,
+      placedAt: new Date().toISOString()
+    });
+    saveFragments(fragments);
+
+    selectedEntryId = null;
+    render();
+  });
+
+  document.addEventListener("click", function (ev) {
+    if (fragmentCardEl.classList.contains("visible") && !fragmentCardEl.contains(ev.target) && !ev.target.classList.contains("fragment")) {
+      fragmentCardEl.classList.remove("visible");
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>

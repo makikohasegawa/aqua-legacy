@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aqua Legacy — 世界観プロトタイプ</title>
+<style>
+  :root {
+    --myth-abyss-deep: #02060b;
+    --myth-abyss-mid: #0a1f2e;
+    --myth-abyss-light: #16394c;
+    --myth-gold: #cda86a;
+    --myth-gold-bright: #f2dba6;
+    --myth-ivory: #f4ead6;
+    --myth-glow: rgba(242, 219, 166, 0.55);
+    --myth-teal-glow: rgba(120, 210, 200, 0.32);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--myth-abyss-deep);
+    overflow: hidden;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  }
+
+  .scene {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 45% at 50% 8%, rgba(247, 226, 173, 0.22), transparent 62%),
+      radial-gradient(ellipse 120% 70% at 50% -8%, rgba(120, 175, 175, 0.28), transparent 60%),
+      radial-gradient(ellipse 90% 60% at 20% 40%, rgba(40, 90, 100, 0.20), transparent 65%),
+      radial-gradient(ellipse 90% 60% at 85% 60%, rgba(40, 90, 100, 0.16), transparent 65%),
+      radial-gradient(ellipse 140% 90% at 50% 120%, rgba(2, 4, 7, 0.95), transparent 60%),
+      linear-gradient(180deg, var(--myth-abyss-mid) 0%, var(--myth-abyss-deep) 62%, #000103 100%);
+  }
+
+  /* ---- 額縁のような、静かな暗さ（絵として見せるための最小限のビネット） ---- */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 78% 78% at 50% 48%, transparent 55%, rgba(0, 2, 4, 0.5) 100%);
+  }
+  /* ---- 暖色のハイライトと寒色の影を重ねる、ごく淡い色調補正 ---- */
+  .color-grade {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+    opacity: 0.5;
+    background:
+      radial-gradient(ellipse 60% 40% at 48% 20%, rgba(247, 226, 173, 0.35), transparent 70%),
+      radial-gradient(ellipse 70% 60% at 50% 100%, rgba(20, 60, 90, 0.4), transparent 70%);
+  }
+
+  /* ---- 遠く、太古から在る気配（背景の巨大なシルエット、ごく淡く） ---- */
+  .ancient-veil {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.7;
+    animation: veil-breathe 22s ease-in-out infinite;
+  }
+  @keyframes veil-breathe {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.85; }
+  }
+  .distant-life {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .distant-drift {
+    animation: distant-sway 26s ease-in-out infinite alternate;
+  }
+  @keyframes distant-sway {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(3.5vw, -1.5vh); }
+  }
+
+  /* ---- 光の帯（volumetric light rays） ---- */
+  .light-rays {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  .ray {
+    animation: ray-shimmer 14s ease-in-out infinite;
+    transform-origin: top center;
+  }
+  .ray:nth-child(1) { animation-delay: 0s; }
+  .ray:nth-child(2) { animation-delay: 3.4s; }
+  .ray:nth-child(3) { animation-delay: 6.8s; }
+  .ray:nth-child(4) { animation-delay: 10.2s; }
+  .ray:nth-child(5) { animation-delay: 1.7s; }
+  @keyframes ray-shimmer {
+    0%, 100% { opacity: 0.10; transform: scaleY(1) skewX(0deg); }
+    50% { opacity: 0.26; transform: scaleY(1.05) skewX(1.2deg); }
+  }
+  /* ---- 水面を通り抜けた光が水中でゆらめく、コースティック（水影） ---- */
+  .caustic-light {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.16;
+  }
+  .god-ray-sweep {
+    position: absolute;
+    inset: -10% -30%;
+    width: 160%;
+    height: 120%;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+    background: linear-gradient(100deg,
+      rgba(242, 219, 166, 0) 30%,
+      rgba(242, 219, 166, 0.18) 47%,
+      rgba(242, 219, 166, 0.06) 55%,
+      rgba(242, 219, 166, 0) 70%);
+    animation: sweep-drift 46s ease-in-out infinite alternate;
+  }
+  @keyframes sweep-drift {
+    0%   { transform: translateX(-12%); }
+    100% { transform: translateX(12%); }
+  }
+
+  /* ---- 有機的な根の建築（roots / branches） ---- */
+  .roots-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .lantern {
+    animation: lantern-pulse 6s ease-in-out infinite;
+  }
+  @keyframes lantern-pulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.15); }
+  }
+  .root-cluster { transform-origin: center; animation: root-breathe 16s ease-in-out infinite; }
+  @keyframes root-breathe {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+
+  /* ---- 光る水草（呼吸するように） ---- */
+  .glow-plants {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .plant-stem {
+    transform-origin: bottom center;
+    animation: plant-breathe 11s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  @keyframes plant-breathe {
+    0%   { transform: rotate(-3deg) scale(1); }
+    50%  { transform: rotate(3deg) scale(1.03); }
+    100% { transform: rotate(-3deg) scale(1); }
+  }
+  .plant-glow {
+    animation: plant-glow-pulse 11s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  @keyframes plant-glow-pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+
+  /* ---- 漂う光の粒子（小さな生き物のように） ---- */
+  .particles, .tiny-spirits, .fish-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  /* ---- 水そのものの流れ。個々のものが単独で漂うのではなく、共有された一つの水流に運ばれている ---- */
+  .particles, .tiny-spirits {
+    transform: translate(var(--current-x, 0), var(--current-y, 0));
+  }
+  .glow-plants {
+    transform: translate(calc(var(--current-x, 0) * 0.3), calc(var(--current-y, 0) * 0.3));
+  }
+  .fish-layer {
+    transform: translate(calc(var(--current-x, 0) * 0.4), calc(var(--current-y, 0) * 0.4));
+  }
+
+  .mote-drift {
+    position: absolute;
+    bottom: -5vh;
+    animation-name: mote-rise;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  .mote {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--myth-glow) 0%, rgba(242, 219, 166, 0) 70%);
+    animation-name: mote-pulse;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes mote-rise {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    8%   { opacity: 0.85; }
+    35%  { transform: translate(1.8vw, -38vh); }
+    50%  { transform: translate(-1.2vw, -55vh); }
+    70%  { transform: translate(1.4vw, -75vh); }
+    92%  { opacity: 0.5; }
+    100% { transform: translate(-1.6vw, -105vh); opacity: 0; }
+  }
+  @keyframes mote-pulse {
+    0%, 100% { transform: scale(0.8); opacity: 0.7; }
+    50% { transform: scale(1.25); opacity: 1; }
+  }
+
+  /* ---- 小さな精霊 ---- */
+  .spirit {
+    position: absolute;
+    animation-name: spirit-drift;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+  .spirit-core {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--myth-ivory) 0%, var(--myth-glow) 45%, rgba(242, 219, 166, 0) 75%);
+    filter: blur(0.3px);
+    animation: spirit-flicker 2.8s ease-in-out infinite;
+  }
+  .spirit-wing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 260%;
+    height: 90%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(244, 234, 214, 0.28), rgba(244, 234, 214, 0) 70%);
+    animation: wing-beat 1.7s ease-in-out infinite;
+  }
+  .spirit-wing.left { transform: translate(-92%, -50%) rotate(-8deg); transform-origin: right center; }
+  .spirit-wing.right { transform: translate(-8%, -50%) rotate(8deg) scaleX(-1); transform-origin: left center; }
+  @keyframes spirit-flicker {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  @keyframes wing-beat {
+    0%, 100% { transform: translate(-92%, -50%) rotate(-8deg) scaleY(1); }
+    50% { transform: translate(-92%, -50%) rotate(-8deg) scaleY(0.5); }
+  }
+  @keyframes spirit-drift {
+    0%   { margin-left: 0; margin-top: 0; }
+    33%  { margin-left: 3vw; margin-top: -2vh; }
+    66%  { margin-left: -1.5vw; margin-top: 1.8vh; }
+    100% { margin-left: -3vw; margin-top: 2.4vh; }
+  }
+
+  /* ---- 精霊のような魚 ---- */
+  .fish-wrap {
+    position: absolute;
+    --facing: 1;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    filter: drop-shadow(0 0 14px var(--myth-glow));
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  /* ---- Expressionのリズム。装飾的なアニメーションの「間」だけを変え、Willや判断はここには一切無い ---- */
+  /* 木が同じ風の中でもそれぞれ違う揺れ方をするのと同じで、これは好みでも判断でもなく、
+     そのBeingが世界にどう在るかという、Natureの延長としての固有のリズム（性格ではない）。 */
+  /* おだやかで、静止に近い間を長く持つリズム */
+  .rhythm-still { animation-name: fish-suspend-still; }
+  @keyframes fish-suspend-still {
+    0%   { transform: translate(0, 0) rotate(0deg) scaleX(var(--facing)); }
+    6%   { transform: translate(0.3vw, -0.2vh) rotate(0.5deg) scaleX(var(--facing)); }
+    42%  { transform: translate(0.4vw, -0.3vh) rotate(0.6deg) scaleX(var(--facing)); }
+    58%  { transform: translate(2vw, -1.4vh) rotate(2deg) scaleX(var(--facing)); }
+    78%  { transform: translate(2.1vw, -1.5vh) rotate(2.1deg) scaleX(var(--facing)); }
+    100% { transform: translate(-1.6vw, 1.6vh) rotate(-2deg) scaleX(var(--facing)); }
+  }
+  /* 光がまたたくように、小さな動きを繰り返すリズム */
+  .rhythm-flickering { animation-name: fish-suspend-flickering; }
+  @keyframes fish-suspend-flickering {
+    0%   { transform: translate(0, 0) rotate(0deg) scaleX(var(--facing)); }
+    10%  { transform: translate(1vw, -0.6vh) rotate(2deg) scaleX(var(--facing)); }
+    18%  { transform: translate(1.05vw, -0.65vh) rotate(2.1deg) scaleX(var(--facing)); }
+    30%  { transform: translate(-0.6vw, 0.8vh) rotate(-2deg) scaleX(var(--facing)); }
+    50%  { transform: translate(2vw, -1.2vh) rotate(3deg) scaleX(var(--facing)); }
+    56%  { transform: translate(2.05vw, -1.25vh) rotate(3.1deg) scaleX(var(--facing)); }
+    74%  { transform: translate(-1.4vw, 1vh) rotate(-3deg) scaleX(var(--facing)); }
+    100% { transform: translate(0.5vw, -0.4vh) rotate(1deg) scaleX(var(--facing)); }
+  }
+  /* なめらかに漂い続けるリズム（元の動きに近い） */
+  .rhythm-flowing { animation-name: fish-suspend-flowing; }
+  @keyframes fish-suspend-flowing {
+    0%   { transform: translate(0, 0) rotate(0deg) scaleX(var(--facing)); }
+    50%  { transform: translate(2.4vw, -1.8vh) rotate(2deg) scaleX(var(--facing)); }
+    100% { transform: translate(-1.8vw, 2vh) rotate(-2deg) scaleX(var(--facing)); }
+  }
+  .fish-breathe {
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+    animation-name: fish-breathe-anim, fish-recede;
+    animation-duration: 6.5s, 21s;
+    animation-timing-function: ease-in-out, ease-in-out;
+    animation-iteration-count: infinite, infinite;
+  }
+  @keyframes fish-breathe-anim {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  /* ---- ときどき、ほんの少しだけ光の奥へ沈み、また戻ってくる ---- */
+  @keyframes fish-recede {
+    0%, 78%, 100% { opacity: 1; filter: blur(0px); }
+    90% { opacity: 0.55; filter: blur(1.1px); }
+  }
+
+  .fin-tail-a { animation: fin-sway 4.6s ease-in-out infinite; transform-origin: 20% 50%; }
+  .fin-tail-b { animation: fin-sway 5.4s ease-in-out infinite; transform-origin: 20% 50%; animation-delay: -1.2s; }
+  .fin-tail-c { animation: fin-sway 6.2s ease-in-out infinite; transform-origin: 20% 50%; animation-delay: -2.4s; }
+  .fin-top    { animation: fin-sway 5s ease-in-out infinite; transform-origin: 55% 90%; }
+  .fin-top-b  { animation: fin-sway 5.9s ease-in-out infinite; animation-delay: -1.4s; transform-origin: 55% 90%; }
+  .fin-front  { animation: fin-sway 4.2s ease-in-out infinite; transform-origin: 70% 30%; }
+  .fin-front-b { animation: fin-sway 4.9s ease-in-out infinite; animation-delay: -0.8s; transform-origin: 70% 30%; }
+  @keyframes fin-sway {
+    0%, 100% { transform: rotate(-6deg) scale(1); }
+    50% { transform: rotate(7deg) scale(1.02); }
+  }
+
+  /* ---- 光る糸のように漂う触手（魚のヒレより、もっと未知の生き物らしさを） ---- */
+  .tendril-a { animation: tendril-drift 8.4s ease-in-out infinite; transform-origin: 10% 50%; }
+  .tendril-b { animation: tendril-drift 9.6s ease-in-out infinite; transform-origin: 10% 50%; animation-delay: -3.1s; }
+  .tendril-c { animation: tendril-drift 10.8s ease-in-out infinite; transform-origin: 10% 50%; animation-delay: -6s; }
+  @keyframes tendril-drift {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(11deg); }
+  }
+  .tendril-bead { animation: bead-glow 3s ease-in-out infinite; }
+  @keyframes bead-glow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .caption {
+    position: fixed;
+    left: 18px;
+    bottom: 16px;
+    color: var(--myth-ivory);
+    opacity: 0.34;
+    font-size: 12px;
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+    text-shadow: 0 0 6px rgba(0,0,0,0.6);
+  }
+
+  /* ---- 静かに現れる紹介カード（ゲームのステータス窓ではなく、出会いの気配として） ---- */
+  .hover-card {
+    position: fixed;
+    z-index: 50;
+    pointer-events: none;
+    min-width: 152px;
+    max-width: 226px;
+    padding: 15px 18px;
+    border-radius: 16px;
+    background: rgba(8, 20, 28, 0.58);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    border: 1px solid rgba(205, 168, 106, 0.32);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35), 0 0 20px rgba(242, 219, 166, 0.07);
+    color: var(--myth-ivory);
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .hover-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .hover-card .hc-name {
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: var(--myth-gold-bright);
+    margin: 0 0 8px;
+  }
+  .hover-card .hc-name.unnamed {
+    font-style: italic;
+    opacity: 0.72;
+    font-size: 13px;
+  }
+  .hover-card .hc-trait {
+    font-size: 12px;
+    line-height: 2;
+    opacity: 0.82;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .hover-card .hc-label {
+    opacity: 0.5;
+    margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+  <div class="scene" id="scene">
+    <svg class="ancient-veil" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <defs>
+        <filter id="veilBlur" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="26" />
+        </filter>
+      </defs>
+      <g fill="#123244" opacity="0.35" filter="url(#veilBlur)">
+        <path d="M -100,1100 C 50,700 150,500 400,520 C 650,540 700,750 1100,650 L 1100,1100 Z" />
+      </g>
+      <g fill="#0c2432" opacity="0.4" filter="url(#veilBlur)">
+        <path d="M -100,-100 C 150,150 250,80 450,180 C 700,300 800,120 1100,150 L 1100,-100 Z" />
+      </g>
+    </svg>
+
+    <!-- 画面の外まで世界が続いているという気配。輪郭のない、遠い生命のシルエット -->
+    <svg class="distant-life" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <defs>
+        <filter id="distantBlur" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
+      </defs>
+      <g class="distant-drift" fill="#e7d3a4" opacity="0.16" filter="url(#distantBlur)" style="animation-delay:-3s">
+        <ellipse cx="150" cy="620" rx="30" ry="12" />
+        <path d="M 122,620 L 96,606 L 100,634 Z" />
+      </g>
+      <g class="distant-drift" fill="#dcc596" opacity="0.13" filter="url(#distantBlur)" style="animation-delay:-9s">
+        <ellipse cx="830" cy="330" rx="24" ry="10" />
+        <path d="M 808,330 L 786,318 L 789,342 Z" />
+      </g>
+      <g class="distant-drift" fill="#3f6a55" opacity="0.18" filter="url(#distantBlur)" style="animation-delay:-5s">
+        <path d="M 900,1000 C 890,900 915,840 902,760" fill="none" stroke="#3f6a55" stroke-width="10" stroke-linecap="round" />
+      </g>
+    </svg>
+
+    <svg class="light-rays" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <polygon class="ray" points="150,0 260,0 60,1000 -80,1000" fill="url(#rayGrad)"></polygon>
+      <polygon class="ray" points="380,0 470,0 330,1000 220,1000" fill="url(#rayGrad)"></polygon>
+      <polygon class="ray" points="560,0 660,0 560,1000 440,1000" fill="url(#rayGrad)"></polygon>
+      <polygon class="ray" points="740,0 850,0 820,1000 680,1000" fill="url(#rayGrad)"></polygon>
+      <polygon class="ray" points="900,0 1010,0 1040,1000 880,1000" fill="url(#rayGrad)"></polygon>
+      <defs>
+        <linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f2dba6" stop-opacity="0.5" />
+          <stop offset="55%" stop-color="#f2dba6" stop-opacity="0.08" />
+          <stop offset="100%" stop-color="#f2dba6" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="god-ray-sweep"></div>
+
+    <svg class="caustic-light" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <defs>
+        <filter id="causticFilter" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.014 0.05" numOctaves="2" seed="12" result="n">
+            <animate attributeName="baseFrequency" values="0.014 0.05;0.019 0.045;0.014 0.05" dur="22s" repeatCount="indefinite" />
+          </feTurbulence>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 0.92  0 0 0 0 0.75  0 0 0 0.55 0" />
+        </filter>
+      </defs>
+      <rect x="0" y="0" width="1000" height="1000" filter="url(#causticFilter)" />
+    </svg>
+
+    <svg class="roots-frame" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <defs>
+        <filter id="softBlur" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" />
+        </filter>
+        <filter id="rootUnderBlur" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="7" />
+        </filter>
+        <radialGradient id="lanternGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f7ecd2" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="#f2dba6" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="leafGlow" cx="35%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#f7ecd2" stop-opacity="0.85" />
+          <stop offset="55%" stop-color="#cda86a" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="#cda86a" stop-opacity="0" />
+        </radialGradient>
+        <filter id="organicEdge" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="4" result="grain" />
+          <feDisplacementMap in="SourceGraphic" in2="grain" scale="7" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+
+      <g class="root-cluster">
+        <g fill="none" stroke="#8a6a3c" stroke-opacity="0.22" stroke-width="9" stroke-linecap="round" filter="url(#rootUnderBlur)">
+          <path d="M -30,-15 C 55,55 35,145 125,175 C 200,200 205,115 270,148 C 315,168 288,225 350,238" />
+          <path d="M -20,10 C 60,55 30,110 95,130" />
+        </g>
+        <g fill="none" stroke="#cda86a" stroke-opacity="0.42" stroke-width="1.6" stroke-linecap="round" filter="url(#organicEdge)">
+          <path d="M -30,-15 C 55,55 35,145 125,175 C 200,200 205,115 270,148 C 315,168 288,225 350,238" />
+          <path d="M 40,90 C 60,105 58,128 82,132" />
+          <path d="M 160,168 C 178,178 176,198 198,202" />
+        </g>
+        <g fill="url(#leafGlow)">
+          <ellipse cx="125" cy="175" rx="12" ry="7" transform="rotate(-30 125 175)" />
+          <ellipse cx="270" cy="148" rx="9" ry="5" transform="rotate(15 270 148)" />
+          <ellipse cx="82" cy="132" rx="6" ry="4" transform="rotate(50 82 132)" />
+        </g>
+        <g class="lantern" fill="#fbf3e2" opacity="0.7" style="animation-delay:0.8s">
+          <polygon points="270,143 275,148 270,155 265,148" />
+        </g>
+      </g>
+
+      <g class="root-cluster" style="animation-delay:-4s">
+        <g fill="none" stroke="#8a6a3c" stroke-opacity="0.22" stroke-width="9" stroke-linecap="round" filter="url(#rootUnderBlur)">
+          <path d="M 1030,-15 C 945,55 965,145 875,175 C 800,200 795,115 730,148 C 685,168 712,225 650,238" />
+          <path d="M 1020,10 C 940,55 970,110 905,130" />
+        </g>
+        <g fill="none" stroke="#cda86a" stroke-opacity="0.42" stroke-width="1.6" stroke-linecap="round" filter="url(#organicEdge)">
+          <path d="M 1030,-15 C 945,55 965,145 875,175 C 800,200 795,115 730,148 C 685,168 712,225 650,238" />
+          <path d="M 960,90 C 940,105 942,128 918,132" />
+        </g>
+        <g fill="url(#leafGlow)">
+          <ellipse cx="875" cy="175" rx="12" ry="7" transform="rotate(30 875 175)" />
+          <ellipse cx="730" cy="148" rx="9" ry="5" transform="rotate(-15 730 148)" />
+        </g>
+        <g class="lantern" fill="#fbf3e2" opacity="0.7" style="animation-delay:2.2s">
+          <polygon points="730,143 735,148 730,155 725,148" />
+        </g>
+      </g>
+
+      <g class="root-cluster" style="animation-delay:-8s">
+        <g fill="none" stroke="#8a6a3c" stroke-opacity="0.2" stroke-width="8" stroke-linecap="round" filter="url(#rootUnderBlur)">
+          <path d="M -30,1015 C 55,940 45,865 135,825 C 200,795 208,858 272,828 C 318,806 292,755 358,742" />
+        </g>
+        <g fill="none" stroke="#cda86a" stroke-opacity="0.36" stroke-width="1.5" stroke-linecap="round" filter="url(#organicEdge)">
+          <path d="M -30,1015 C 55,940 45,865 135,825 C 200,795 208,858 272,828 C 318,806 292,755 358,742" />
+          <path d="M 70,900 C 90,888 88,868 112,862" />
+        </g>
+        <g fill="url(#leafGlow)">
+          <ellipse cx="135" cy="825" rx="10" ry="6" transform="rotate(-25 135 825)" />
+        </g>
+      </g>
+
+      <g class="root-cluster" style="animation-delay:-11s">
+        <g fill="none" stroke="#8a6a3c" stroke-opacity="0.2" stroke-width="8" stroke-linecap="round" filter="url(#rootUnderBlur)">
+          <path d="M 1030,1015 C 945,940 955,865 865,825 C 800,795 792,858 728,828 C 682,806 708,755 642,742" />
+        </g>
+        <g fill="none" stroke="#cda86a" stroke-opacity="0.36" stroke-width="1.5" stroke-linecap="round" filter="url(#organicEdge)">
+          <path d="M 1030,1015 C 945,940 955,865 865,825 C 800,795 792,858 728,828 C 682,806 708,755 642,742" />
+        </g>
+        <g fill="url(#leafGlow)">
+          <ellipse cx="865" cy="825" rx="10" ry="6" transform="rotate(25 865 825)" />
+        </g>
+      </g>
+
+      <g class="lantern" filter="url(#softBlur)">
+        <ellipse cx="128" cy="172" rx="7" ry="9" fill="url(#lanternGlow)" />
+        <ellipse cx="260" cy="150" rx="5" ry="7" fill="url(#lanternGlow)" />
+      </g>
+      <g class="lantern" filter="url(#softBlur)" style="animation-delay:1.6s">
+        <ellipse cx="872" cy="172" rx="7" ry="9" fill="url(#lanternGlow)" />
+        <ellipse cx="740" cy="150" rx="5" ry="7" fill="url(#lanternGlow)" />
+      </g>
+      <g class="lantern" filter="url(#softBlur)" style="animation-delay:3s">
+        <ellipse cx="132" cy="822" rx="7" ry="9" fill="url(#lanternGlow)" />
+        <ellipse cx="265" cy="822" rx="5" ry="7" fill="url(#lanternGlow)" />
+      </g>
+      <g class="lantern" filter="url(#softBlur)" style="animation-delay:4.4s">
+        <ellipse cx="868" cy="822" rx="7" ry="9" fill="url(#lanternGlow)" />
+        <ellipse cx="735" cy="822" rx="5" ry="7" fill="url(#lanternGlow)" />
+      </g>
+    </svg>
+
+    <svg class="glow-plants" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <defs>
+        <radialGradient id="plantGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#cdeed9" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="#bfe8cf" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <g class="plant-stem" style="animation-delay:0s">
+        <path d="M 90,1000 C 78,860 132,760 98,650 C 82,596 108,560 96,510" fill="none" stroke="#3f6a55" stroke-width="4" stroke-opacity="0.55" stroke-linecap="round" />
+        <circle class="plant-glow" cx="96" cy="510" r="15" fill="url(#plantGlow)" />
+      </g>
+      <g class="plant-stem" style="animation-delay:1.6s">
+        <path d="M 190,1000 C 206,880 163,790 197,700" fill="none" stroke="#3f6a55" stroke-width="3" stroke-opacity="0.5" stroke-linecap="round" />
+        <circle class="plant-glow" cx="197" cy="700" r="10" fill="url(#plantGlow)" style="animation-delay:1.6s" />
+      </g>
+      <g class="plant-stem" style="animation-delay:2.8s">
+        <path d="M 830,1000 C 844,860 799,760 833,650 C 850,596 822,560 836,505" fill="none" stroke="#3f6a55" stroke-width="4" stroke-opacity="0.55" stroke-linecap="round" />
+        <circle class="plant-glow" cx="836" cy="505" r="15" fill="url(#plantGlow)" style="animation-delay:2.8s" />
+      </g>
+      <g class="plant-stem" style="animation-delay:0.9s">
+        <path d="M 920,1000 C 899,880 941,790 904,700" fill="none" stroke="#3f6a55" stroke-width="3" stroke-opacity="0.5" stroke-linecap="round" />
+        <circle class="plant-glow" cx="904" cy="700" r="10" fill="url(#plantGlow)" style="animation-delay:0.9s" />
+      </g>
+    </svg>
+
+    <div class="particles" id="particles"></div>
+    <div class="tiny-spirits" id="tinySpirits"></div>
+    <div class="fish-layer" id="fishLayer"></div>
+    <div class="color-grade"></div>
+    <div class="vignette"></div>
+
+    <div class="caption">
+      Aqua Legacy — 世界観プロトタイプ（実験）<br />
+      Being / Nature / Situation / Perception / Opportunity / Will / Response / Experience / Memory は変更していません。表現のみの試みです。
+    </div>
+
+    <div class="hover-card" id="hoverCard"></div>
+  </div>
+
+<script>
+  // ===== Natureの語彙は src/aquarium/index.html（DEC-0007）とまったく同じものを再利用する =====
+  var BODY_COLOR_HEX = {
+    red: "#e2483d",
+    orange: "#f2924c",
+    yellow: "#f4d35e",
+    green: "#4f9d69",
+    turquoise: "#3fb8af",
+    lightBlue: "#8ecae6",
+    blue: "#3a7ca5",
+    purple: "#8e6bb0",
+    pink: "#e88fb0",
+    white: "#f5f5f0",
+    black: "#2b2b2b",
+    brown: "#8b5e3c",
+    gold: "#e0b866",
+    silver: "#cfd6da"
+  };
+  var BODY_COLOR_KEYS = Object.keys(BODY_COLOR_HEX);
+  var PATTERN_KEYS = ["solid", "gradient", "bicolor", "marble", "spots", "stripes"];
+  var FIN_LENGTH_SCALE = { short: 0.7, medium: 1, long: 1.4 };
+  var FIN_LENGTH_KEYS = ["short", "medium", "long"];
+  // 体型ごとの、花びら／炎のようなシルエットの輪郭パラメータ（頭側x, 尾側x, 半分の高さ, 一番ふくらむ位置の比率）
+  var BODY_SHAPE_PROFILE = {
+    slim:     { headX: 34, tailX: 130, halfH: 12.5, bulge: 0.32 },
+    standard: { headX: 36, tailX: 118, halfH: 18.5, bulge: 0.38 },
+    round:    { headX: 40, tailX: 104, halfH: 25.5, bulge: 0.42 }
+  };
+  var BODY_SHAPE_KEYS = ["slim", "standard", "round"];
+  var GENDER_KEYS = ["male", "female"];
+
+  // 表示用ラベル。src/aquarium/index.html（DEC-0007）と同じ日本語表記に揃える。
+  var GENDER_LABELS = { male: "オス", female: "メス" };
+  var BODY_COLOR_LABELS = {
+    red: "赤", orange: "オレンジ", yellow: "黄", green: "緑", turquoise: "ターコイズ",
+    lightBlue: "水色", blue: "青", purple: "紫", pink: "ピンク", white: "白",
+    black: "黒", brown: "茶", gold: "金", silver: "銀"
+  };
+  var PATTERN_LABELS = {
+    solid: "単色", gradient: "グラデーション", bicolor: "ツートン",
+    marble: "マーブル", spots: "水玉", stripes: "縞"
+  };
+  var FIN_LENGTH_LABELS = { short: "短い", medium: "普通", long: "長い" };
+  var BODY_SHAPE_LABELS = { slim: "スリム", standard: "標準", round: "丸型" };
+
+  var BEINGS_STORAGE_KEY = "aqualegacy_beings";
+
+  // ---- 色ユーティリティ ----
+  function hexToRgb(hex) {
+    var clean = hex.replace("#", "");
+    return {
+      r: parseInt(clean.substring(0, 2), 16),
+      g: parseInt(clean.substring(2, 4), 16),
+      b: parseInt(clean.substring(4, 6), 16)
+    };
+  }
+  function rgbToHex(rgb) {
+    function c(v) { return Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0"); }
+    return "#" + c(rgb.r) + c(rgb.g) + c(rgb.b);
+  }
+  // Natureの色を、そのまま使うのではなく「水と光と金でできている」感触へ寄せる。
+  // 判定・保存されるnature.bodyColorの値そのものは一切変えない。表現だけを変える。
+  function mythifyColor(hex, goldBlend) {
+    var rgb = hexToRgb(hex);
+    var gold = { r: 224, g: 197, b: 150 };
+    var blend = typeof goldBlend === "number" ? goldBlend : 0.35;
+    return rgbToHex({
+      r: rgb.r * (1 - blend) + gold.r * blend,
+      g: rgb.g * (1 - blend) + gold.g * blend,
+      b: rgb.b * (1 - blend) + gold.b * blend
+    });
+  }
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function randRange(min, max) { return min + Math.random() * (max - min); }
+
+  // ===== 動きの「間」は、そのBeingのidから一意に決まる、Expressionの一部。=====
+  // 性格でも好みでもなく、Perceptionと対になるExpression（世界がそのBeingをどう経験するか）の、
+  // 今はまだNatureだけに由来する最小の形。将来Memoryが育てば、ここに関わってくる余地を残している。
+  // Willでも判断でもない。idから常に同じリズムへ導出するだけで、選ばれるものは何もない。
+  var EXPRESSION_RHYTHMS = [
+    { cls: "rhythm-still", duration: [27, 37] },
+    { cls: "rhythm-flickering", duration: [15, 21] },
+    { cls: "rhythm-flowing", duration: [18, 26] }
+  ];
+  function hashStringToInt(str) {
+    var h = 0;
+    for (var i = 0; i < str.length; i++) {
+      h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    }
+    return h;
+  }
+  function pickExpressionRhythm(id) {
+    return EXPRESSION_RHYTHMS[hashStringToInt(String(id)) % EXPRESSION_RHYTHMS.length];
+  }
+
+  // ===== Beingの読み込み。既存のsrc/aquariumと同じキーを見にいくが、無ければ例として生成する =====
+  function loadBeingsFromStorage() {
+    try {
+      var raw = localStorage.getItem(BEINGS_STORAGE_KEY);
+      var beings = raw ? JSON.parse(raw) : [];
+      return Array.isArray(beings) ? beings.filter(function (b) { return b && b.nature; }) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function generateExampleBeing(index) {
+    return {
+      id: "example-" + index,
+      type: "fish",
+      name: "",
+      nature: {
+        gender: pick(GENDER_KEYS),
+        bodyColor: pick(BODY_COLOR_KEYS),
+        pattern: pick(PATTERN_KEYS),
+        finLength: pick(FIN_LENGTH_KEYS),
+        bodyShape: pick(BODY_SHAPE_KEYS)
+      }
+    };
+  }
+
+  function resolveBeingsForScene() {
+    var beings = loadBeingsFromStorage();
+    if (beings.length > 0) return beings;
+    // 同一オリジンで保存済みのBeingが見つからない場合のみ、雰囲気確認用の例を生成する。
+    // これはBeingを新しく「作る」のではなく、保存されたデータが読めないときの表示上のフォールバック。
+    var examples = [];
+    for (var i = 0; i < 5; i++) examples.push(generateExampleBeing(i));
+    return examples;
+  }
+
+  // ===== 共有のSVGフィルター／グラデーション定義 =====
+  var svgFilterDefsInjected = false;
+  function ensureSharedDefs() {
+    if (svgFilterDefsInjected) return;
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svgEl = document.createElementNS(svgNS, "svg");
+    svgEl.setAttribute("width", "0");
+    svgEl.setAttribute("height", "0");
+    svgEl.style.position = "absolute";
+    var defs = document.createElementNS(svgNS, "defs");
+    defs.innerHTML =
+      '<filter id="fishGlow" x="-60%" y="-60%" width="220%" height="220%">' +
+      '  <feGaussianBlur stdDeviation="2.6" />' +
+      "</filter>" +
+      '<filter id="fishSoftGlow" x="-80%" y="-80%" width="260%" height="260%">' +
+      '  <feGaussianBlur stdDeviation="6" />' +
+      "</filter>" +
+      '<filter id="fishHalo" x="-120%" y="-120%" width="340%" height="340%">' +
+      '  <feGaussianBlur stdDeviation="11" />' +
+      "</filter>" +
+      '<filter id="marbleTexture">' +
+      '  <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="2" seed="7" result="noise" />' +
+      '  <feColorMatrix in="noise" type="matrix" values="0 0 0 0 1  0 0 0 0 0.93  0 0 0 0 0.75  0 0 0 0.45 0" />' +
+      "</filter>";
+    svgEl.appendChild(defs);
+    document.body.appendChild(svgEl);
+    svgFilterDefsInjected = true;
+  }
+
+  // ===== 体（花びら／炎のような、非対称に流れる輪郭） =====
+  function buildBodyPath(profile) {
+    var headX = profile.headX, tailX = profile.tailX, h = profile.halfH;
+    var midX = headX + (tailX - headX) * profile.bulge;
+    var cy = 50;
+    return (
+      "M " + headX + "," + cy +
+      " C " + (headX + (midX - headX) * 0.3) + "," + (cy - h * 1.05) +
+      " " + (midX - (midX - headX) * 0.2) + "," + (cy - h) +
+      " " + midX + "," + (cy - h * 0.9) +
+      " C " + (midX + (tailX - midX) * 0.55) + "," + (cy - h * 0.5) +
+      " " + (tailX - (tailX - midX) * 0.1) + "," + (cy - h * 0.12) +
+      " " + tailX + "," + cy +
+      " C " + (tailX - (tailX - midX) * 0.1) + "," + (cy + h * 0.12) +
+      " " + (midX + (tailX - midX) * 0.55) + "," + (cy + h * 0.5) +
+      " " + midX + "," + (cy + h * 0.9) +
+      " C " + (midX - (midX - headX) * 0.2) + "," + (cy + h) +
+      " " + (headX + (midX - headX) * 0.3) + "," + (cy + h * 1.05) +
+      " " + headX + "," + cy + " Z"
+    );
+  }
+
+  // ===== 花びら／絹のリボンのようなヒレ =====
+  function buildFinRibbon(cx, cy, length, width, rotate, opacity, curl, cssClass) {
+    curl = curl || 0;
+    var x1 = cx, y1 = cy - width / 2;
+    var x2 = cx + length, y2 = cy;
+    var x3 = cx, y3 = cy + width / 2;
+    var c1x = cx + length * 0.62, c1y = cy - width * 0.26 - curl;
+    var c2x = cx + length * 0.62, c2y = cy + width * 0.26 + curl;
+    var d =
+      "M " + x1 + "," + y1 +
+      " Q " + c1x + "," + c1y + " " + x2 + "," + y2 +
+      " Q " + c2x + "," + c2y + " " + x3 + "," + y3 +
+      " Q " + (cx + length * 0.12) + "," + cy + " " + x1 + "," + y1 + " Z";
+    return (
+      '<g class="' + cssClass + '">' +
+      '<path d="' + d + '" transform="rotate(' + rotate + " " + cx + " " + cy + ')" fill="url(#finGrad)" ' +
+      'fill-opacity="' + opacity + '" stroke="#f4ead6" stroke-opacity="0.28" stroke-width="0.5" />' +
+      "</g>"
+    );
+  }
+
+  function quadBezierPoint(p0, p1, p2, t) {
+    var mt = 1 - t;
+    return {
+      x: mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x,
+      y: mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y
+    };
+  }
+
+  // ===== 光る糸のように漂う触手。魚のヒレの語彙ではなく、未知の生き物の語彙として加える =====
+  function buildTendril(cx, cy, length, curl, rotate, cssClass) {
+    var p0 = { x: cx, y: cy };
+    var p1 = { x: cx + length * 0.55, y: cy + curl };
+    var p2 = { x: cx + length, y: cy + curl * 1.6 };
+    var d = "M " + p0.x + "," + p0.y + " Q " + p1.x + "," + p1.y + " " + p2.x + "," + p2.y;
+    var beads = "";
+    [0.4, 0.72, 0.94].forEach(function (t, i) {
+      var pt = quadBezierPoint(p0, p1, p2, t);
+      var r = 1.6 - i * 0.4;
+      beads +=
+        '<circle class="tendril-bead" cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="' + r.toFixed(1) +
+        '" fill="#faf1de" style="mix-blend-mode:screen" />';
+    });
+    return (
+      '<g class="' + cssClass + '" transform="rotate(' + rotate + " " + cx + " " + cy + ')">' +
+      '<path d="' + d + '" fill="none" stroke="#f4ead6" stroke-opacity="0.32" stroke-width="0.8" stroke-linecap="round" />' +
+      beads +
+      "</g>"
+    );
+  }
+
+  // ===== 中心から放射状に広がる、透けた生体のような内側の筋 =====
+  function buildInnerVeins(frontX, rx, ry) {
+    var lines = "";
+    var count = 5;
+    for (var i = 0; i < count; i++) {
+      var angle = (i / (count - 1) - 0.5) * 1.5;
+      var endX = frontX + Math.cos(angle) * rx * 0.85;
+      var endY = 50 + Math.sin(angle) * ry * 0.85;
+      lines +=
+        '<path d="M ' + frontX + ",50 Q " + (frontX + (endX - frontX) * 0.6) + "," + (50 + (endY - 50) * 0.3) +
+        " " + endX.toFixed(1) + "," + endY.toFixed(1) +
+        '" fill="none" stroke="#fbf3e2" stroke-opacity="0.12" stroke-width="0.6" style="mix-blend-mode:screen" />';
+    }
+    return lines;
+  }
+
+  function buildPatternOverlay(pattern, rx, ry) {
+    switch (pattern) {
+      case "spots": {
+        var spots = "";
+        var count = 4;
+        for (var i = 0; i < count; i++) {
+          var sx = 62 - rx * 0.45 + Math.random() * rx * 0.9;
+          var sy = 50 - ry * 0.5 + Math.random() * ry * 1.0;
+          spots +=
+            '<circle cx="' + sx.toFixed(1) + '" cy="' + sy.toFixed(1) + '" r="' + (2.2 + Math.random() * 1.8).toFixed(1) +
+            '" fill="#fbf3e2" fill-opacity="0.4" filter="url(#fishSoftGlow)" style="mix-blend-mode:screen" />';
+        }
+        return spots;
+      }
+      case "stripes": {
+        var stripes = "";
+        for (var s = 0; s < 3; s++) {
+          var sx0 = 60 - rx * 0.55 + s * (rx * 0.5);
+          stripes +=
+            '<path d="M ' + sx0.toFixed(1) + "," + (50 - ry * 0.75) + " Q " + (sx0 + 5).toFixed(1) + ",50 " +
+            sx0.toFixed(1) + "," + (50 + ry * 0.75) + '" fill="none" stroke="#fbf3e2" stroke-opacity="0.3" ' +
+            'stroke-width="2.2" filter="url(#fishSoftGlow)" style="mix-blend-mode:screen" />';
+        }
+        return stripes;
+      }
+      case "marble":
+        return (
+          '<ellipse cx="60" cy="50" rx="' + rx + '" ry="' + ry +
+          '" fill="#ffffff" fill-opacity="0.14" filter="url(#marbleTexture)" style="mix-blend-mode:screen" />'
+        );
+      case "bicolor":
+        return (
+          '<path d="M 60,' + (50 - ry) + " A " + rx + " " + ry + " 0 0 1 60," + (50 + ry) +
+          ' Z" fill="#fbf3e2" fill-opacity="0.15" style="mix-blend-mode:screen" />'
+        );
+      case "gradient":
+        return (
+          '<ellipse cx="60" cy="50" rx="' + rx + '" ry="' + ry +
+          '" fill="url(#gradientOverlay)" fill-opacity="0.28" style="mix-blend-mode:screen" />'
+        );
+      default:
+        return "";
+    }
+  }
+
+  function buildSpiritFishSvg(nature, uid) {
+    var profile = BODY_SHAPE_PROFILE[nature.bodyShape] || BODY_SHAPE_PROFILE.standard;
+    var finScale = FIN_LENGTH_SCALE[nature.finLength] || 1;
+    var baseHex = BODY_COLOR_HEX[nature.bodyColor] || BODY_COLOR_HEX.blue;
+    var glowHex = mythifyColor(baseHex, 0.45);
+    var coreHex = mythifyColor(baseHex, 0.85);
+    var rx = (profile.tailX - profile.headX) / 2;
+    var ry = profile.halfH;
+
+    var tailBaseX = profile.tailX - 6, tailBaseY = 50;
+    var frontX = profile.headX + (profile.tailX - profile.headX) * profile.bulge * 0.9;
+
+    var tailLen = 40 * finScale, tailWidth = 15 * finScale;
+    var topLen = 15 * finScale, topWidth = 7 * finScale;
+    var frontLen = 11 * finScale, frontWidth = 6 * finScale;
+
+    var bodyPath = buildBodyPath(profile);
+
+    var svg =
+      '<svg viewBox="0 0 170 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;overflow:visible;">' +
+      "<defs>" +
+      '<radialGradient id="bodyGrad-' + uid + '" cx="34%" cy="42%" r="70%">' +
+      '<stop offset="0%" stop-color="#fbf3e2" stop-opacity="0.9" />' +
+      '<stop offset="30%" stop-color="' + coreHex + '" stop-opacity="0.85" />' +
+      '<stop offset="72%" stop-color="' + glowHex + '" stop-opacity="0.5" />' +
+      '<stop offset="100%" stop-color="' + glowHex + '" stop-opacity="0.08" />' +
+      "</radialGradient>" +
+      '<radialGradient id="finGrad" cx="25%" cy="50%" r="75%">' +
+      '<stop offset="0%" stop-color="#faf1de" stop-opacity="0.5" />' +
+      '<stop offset="100%" stop-color="#faf1de" stop-opacity="0.03" />' +
+      "</radialGradient>" +
+      '<linearGradient id="gradientOverlay" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0%" stop-color="#ffffff" stop-opacity="0.35" />' +
+      '<stop offset="100%" stop-color="#ffffff" stop-opacity="0" />' +
+      "</linearGradient>" +
+      "</defs>" +
+      // 外側のごく柔らかい後光（控えめに）
+      '<ellipse cx="' + frontX + '" cy="50" rx="' + (rx + 14) + '" ry="' + (ry + 10) +
+      '" fill="' + glowHex + '" fill-opacity="0.14" filter="url(#fishHalo)" />' +
+      // 光る糸のように漂う触手（魚のヒレより奥、体の後ろから）
+      buildTendril(tailBaseX - 4, tailBaseY - ry * 0.3, tailLen * 1.3, 10, 176, "tendril-a") +
+      buildTendril(tailBaseX - 2, tailBaseY, tailLen * 1.15, -6, 182, "tendril-b") +
+      buildTendril(tailBaseX - 4, tailBaseY + ry * 0.32, tailLen * 1.0, 8, 188, "tendril-c") +
+      // 尾（3枚重ねの絹のリボン）
+      buildFinRibbon(tailBaseX, tailBaseY, tailLen, tailWidth, 178, 0.32, 6, "fin-tail-a") +
+      buildFinRibbon(tailBaseX, tailBaseY, tailLen * 0.82, tailWidth * 0.8, 186, 0.4, -4, "fin-tail-b") +
+      buildFinRibbon(tailBaseX, tailBaseY, tailLen * 0.62, tailWidth * 0.6, 172, 0.5, 3, "fin-tail-c") +
+      // 背（花のように重なる、上へ流れるリボン）
+      buildFinRibbon(frontX, 50 - ry * 0.65, topLen, topWidth, -78, 0.42, 2, "fin-top") +
+      buildFinRibbon(frontX - rx * 0.1, 50 - ry * 0.55, topLen * 0.75, topWidth * 0.8, -95, 0.32, -1, "fin-top-b") +
+      // 胸（花のように重なる、前方のリボン）
+      buildFinRibbon(frontX + rx * 0.25, 50 + ry * 0.45, frontLen, frontWidth, 60, 0.38, 1, "fin-front") +
+      buildFinRibbon(frontX + rx * 0.1, 50 + ry * 0.35, frontLen * 0.8, frontWidth * 0.8, 78, 0.3, -1, "fin-front-b") +
+      // ふちが水へ溶けていく、ぼかされた縁の下地（輪郭線の代わり）
+      '<path d="' + bodyPath + '" fill="none" stroke="' + glowHex + '" stroke-opacity="0.5" stroke-width="3" filter="url(#fishSoftGlow)" />' +
+      // 本体（花びら／炎のようなシルエット）。硬い輪郭線は持たない
+      '<path d="' + bodyPath + '" fill="url(#bodyGrad-' + uid + ')" />' +
+      // ふちを包む光（水そのものが縁取っているような、細いリムライト）
+      '<path d="M ' + (profile.headX + rx * 0.15) + "," + (50 - ry * 0.75) + " Q " + frontX + "," + (50 - ry * 1.08) +
+      " " + (frontX + rx * 0.5) + "," + (50 - ry * 0.6) +
+      '" fill="none" stroke="#fffaf0" stroke-opacity="0.4" stroke-width="0.7" stroke-linecap="round" style="mix-blend-mode:screen" />' +
+      // 透けた内側の筋（生体の内部が透けて見えるように）
+      buildInnerVeins(frontX, rx, ry) +
+      buildPatternOverlay(nature.pattern, rx, ry) +
+      // 内から光る核。目ではなく、内側から発光する生命そのものの中心
+      '<ellipse cx="' + (frontX - rx * 0.15) + '" cy="49" rx="' + (rx * 0.32) + '" ry="' + (ry * 0.4) +
+      '" fill="#fffaf0" fill-opacity="0.55" filter="url(#fishGlow)" style="mix-blend-mode:screen" />' +
+      "</svg>";
+    return svg;
+  }
+
+  // ===== 静かな紹介カード（ゲームのステータス窓ではなく、出会いの気配として） =====
+  // 今はNatureのみを表示する。将来、年齢・Experience数・Memory数・
+  // 今のExpressionを表す短い一文などを、この同じカードに静かに加えていく想定（実装はまだ）。
+  var hoverCardEl = null;
+
+  function formatBeingCardHtml(nature, name) {
+    var nameHtml = name
+      ? '<p class="hc-name">' + escapeHtml(name) + "</p>"
+      : '<p class="hc-name unnamed">まだ名づけられていない</p>';
+    var rows = [
+      ["性別", GENDER_LABELS[nature.gender] || nature.gender],
+      ["体色", BODY_COLOR_LABELS[nature.bodyColor] || nature.bodyColor],
+      ["柄", PATTERN_LABELS[nature.pattern] || nature.pattern],
+      ["鰭の長さ", FIN_LENGTH_LABELS[nature.finLength] || nature.finLength],
+      ["体型", BODY_SHAPE_LABELS[nature.bodyShape] || nature.bodyShape]
+    ];
+    var traitHtml = rows.map(function (row) {
+      return '<p class="hc-trait"><span class="hc-label">' + row[0] + "</span>" + row[1] + "</p>";
+    }).join("");
+    return nameHtml + traitHtml;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function showHoverCard(nature, name, x, y) {
+    if (!hoverCardEl) return;
+    hoverCardEl.innerHTML = formatBeingCardHtml(nature, name);
+    positionHoverCard(x, y);
+    hoverCardEl.classList.add("visible");
+  }
+
+  function positionHoverCard(x, y) {
+    if (!hoverCardEl) return;
+    var offsetX = 22, offsetY = -18;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var left = x + offsetX;
+    var top = y + offsetY;
+    // カードが画面の外へはみ出さないよう、そっと反対側へ寄せる
+    if (left + 230 > vw) left = x - 230 - offsetX;
+    if (top < 10) top = 10;
+    if (top + 160 > vh) top = vh - 170;
+    hoverCardEl.style.left = left + "px";
+    hoverCardEl.style.top = top + "px";
+  }
+
+  function hideHoverCard() {
+    if (!hoverCardEl) return;
+    hoverCardEl.classList.remove("visible");
+  }
+
+  // ===== レイヤーの生成 =====
+  function spawnParticles(container, count) {
+    for (var i = 0; i < count; i++) {
+      var drift = document.createElement("div");
+      drift.className = "mote-drift";
+      var size = randRange(2, 6);
+      drift.style.width = size + "px";
+      drift.style.height = size + "px";
+      drift.style.left = randRange(0, 100) + "%";
+      drift.style.animationDuration = randRange(16, 34) + "s";
+      drift.style.animationDelay = "-" + randRange(0, 30) + "s";
+
+      var pulse = document.createElement("div");
+      pulse.className = "mote";
+      pulse.style.animationDuration = randRange(2, 4.5) + "s";
+      pulse.style.animationDelay = "-" + randRange(0, 4) + "s";
+
+      drift.appendChild(pulse);
+      container.appendChild(drift);
+    }
+  }
+
+  function spawnTinySpirits(container, count) {
+    for (var i = 0; i < count; i++) {
+      var wrap = document.createElement("div");
+      wrap.className = "spirit";
+      var size = randRange(6, 10);
+      wrap.style.width = size + "px";
+      wrap.style.height = size + "px";
+      wrap.style.left = randRange(5, 92) + "%";
+      wrap.style.top = randRange(10, 85) + "%";
+      wrap.style.animationDuration = randRange(11, 20) + "s";
+      wrap.style.animationDelay = "-" + randRange(0, 14) + "s";
+
+      var core = document.createElement("div");
+      core.className = "spirit-core";
+      core.style.animationDelay = "-" + randRange(0, 2) + "s";
+
+      var wingL = document.createElement("div");
+      wingL.className = "spirit-wing left";
+      var wingR = document.createElement("div");
+      wingR.className = "spirit-wing right";
+
+      wrap.appendChild(wingL);
+      wrap.appendChild(wingR);
+      wrap.appendChild(core);
+      container.appendChild(wrap);
+    }
+  }
+
+  function spawnFish(container, beings) {
+    beings.forEach(function (being, index) {
+      var outer = document.createElement("div");
+      var rhythm = pickExpressionRhythm(being.id || ("idx" + index));
+      outer.className = "fish-wrap " + rhythm.cls;
+      var size = randRange(12, 17);
+      outer.style.width = size + "vw";
+      outer.style.maxWidth = "250px";
+      outer.style.top = randRange(18, 74) + "%";
+      outer.style.left = randRange(8, 78) + "%";
+      outer.style.animationDuration = randRange(rhythm.duration[0], rhythm.duration[1]) + "s";
+      outer.style.animationDelay = "-" + randRange(0, rhythm.duration[1]) + "s";
+      var facing = Math.random() < 0.5 ? 1 : -1;
+      outer.style.setProperty("--facing", facing);
+
+      var breathe = document.createElement("div");
+      breathe.className = "fish-breathe";
+      // fish-breathe には fish-breathe-anim（呼吸）と fish-recede（時々深みへ沈む）の
+      // 2つのアニメーションが重なっているため、間隔はカンマ区切りでそれぞれ個別に指定する。
+      breathe.style.animationDuration = randRange(5.5, 8) + "s, " + randRange(17, 27) + "s";
+      breathe.style.animationDelay = "-" + randRange(0, 6) + "s, -" + randRange(0, 24) + "s";
+      breathe.innerHTML = buildSpiritFishSvg(being.nature, "f" + index);
+
+      // 静かな紹介カード：出会いの気配として、そっと現れる
+      outer.addEventListener("mouseenter", function (ev) {
+        showHoverCard(being.nature, being.name, ev.clientX, ev.clientY);
+      });
+      outer.addEventListener("mousemove", function (ev) {
+        positionHoverCard(ev.clientX, ev.clientY);
+      });
+      outer.addEventListener("mouseleave", hideHoverCard);
+
+      outer.appendChild(breathe);
+      container.appendChild(outer);
+    });
+  }
+
+  // ===== 初期化 =====
+  // ===== 水そのものの流れ。個々の粒子や魚が単独で漂うのではなく、共有された一つの潮に運ばれている。=====
+  // これは新しい状態やArchitectureではなく、単に見え方(--current-x/--current-y)をscene全体で
+  // 揺らしているだけの、装飾的な演出。
+  function startCurrentField(sceneEl) {
+    var t0 = null;
+    function tick(ts) {
+      if (t0 === null) t0 = ts;
+      var t = (ts - t0) / 1000;
+      var cx = Math.sin(t * 0.06) * 1.1 + Math.sin(t * 0.021) * 0.6;
+      var cy = Math.cos(t * 0.045) * 0.7 + Math.sin(t * 0.013) * 0.4;
+      sceneEl.style.setProperty("--current-x", cx.toFixed(3) + "vw");
+      sceneEl.style.setProperty("--current-y", cy.toFixed(3) + "vh");
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  (function init() {
+    var sceneEl = document.getElementById("scene");
+    var particlesEl = document.getElementById("particles");
+    var spiritsEl = document.getElementById("tinySpirits");
+    var fishEl = document.getElementById("fishLayer");
+    hoverCardEl = document.getElementById("hoverCard");
+
+    ensureSharedDefs();
+    spawnParticles(particlesEl, 30);
+    spawnTinySpirits(spiritsEl, 7);
+    spawnFish(fishEl, resolveBeingsForScene());
+    startCurrentField(sceneEl);
+  })();
+</script>
+</body>
+</html>

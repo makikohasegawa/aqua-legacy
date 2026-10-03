@@ -353,6 +353,9 @@
   <script>
     const STORAGE_KEY = "aqualegacy_being_log_entries";
     const LAST_BACKUP_KEY = "aqualegacy_being_log_last_backup_at";
+    // DEC-0012 / DEC-0013: recordNumberは、記録がBeing Logに生まれた瞬間に一度だけ
+    // 刻まれるシリアルナンバー。記録の配列とは別の、独立したカウンターとして持つ。
+    const RECORD_NUMBER_COUNTER_KEY = "aqualegacy_being_log_next_record_number";
 
     const DAILY_PHRASES = [
       "Water does not fight. It simply flows.",
@@ -383,6 +386,67 @@
 
     function saveEntries(entries) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    // DEC-0011: 新しく作られるエントリーだけがidを持つ。既存の記録に遡ってidを振り直すことはしない。
+    // このidは、将来Gardenの「希望のカケラ」(HopeFragment)が、どのBeing Logエントリーから
+    // 生まれたかを指し示すために使う。Being Log自体の見た目・挙動には影響しない。
+    function generateEntryId() {
+      if (typeof crypto !== "undefined" && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return "entry-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    // --- recordNumber (DEC-0012 / DEC-0013) ---
+
+    function getNextRecordNumber() {
+      const raw = localStorage.getItem(RECORD_NUMBER_COUNTER_KEY);
+      const n = raw !== null ? parseInt(raw, 10) : 1;
+      return Number.isFinite(n) && n >= 1 ? n : 1;
+    }
+
+    function setNextRecordNumber(n) {
+      localStorage.setItem(RECORD_NUMBER_COUNTER_KEY, String(n));
+    }
+
+    function formatRecordNumber(n) {
+      return "#" + String(n).padStart(6, "0");
+    }
+
+    // DEC-0012: recordNumberを持たない記録(=まだシリアルナンバーを与えられていない
+    // 記録)があれば、createdAtの古い順に並べ、その時点のカウンターの値から順に
+    // 付与する。初回起動時は、既存の全記録がここで#000001から番号を得る。以後は
+    // すべての記録がrecordNumberを持つため、この関数は何もしない(=繰り返し呼んでも安全)。
+    function migrateRecordNumbers() {
+      const entries = loadEntries();
+      const missing = entries.filter((e) => typeof e.recordNumber !== "number");
+      if (missing.length === 0) return;
+
+      missing.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      let next = getNextRecordNumber();
+      missing.forEach((entry) => {
+        entry.recordNumber = next;
+        next += 1;
+      });
+      setNextRecordNumber(next);
+      saveEntries(entries);
+    }
+
+    // DEC-0013: バックアップ復元時のカウンターの扱い。「置き換え」は読み込んだ値を
+    // そのまま採用し、「追加」は今のカウンターと読み込んだカウンターの大きい方を
+    // 採用することで、番号の巻き戻り・重複を防ぐ。読み込んだファイルにカウンターが
+    // 含まれていない場合(recordNumber導入前の古いバックアップ)は何もしない。その場合、
+    // 取り込まれた記録はmigrateRecordNumbers()によって、今のカウンターの続きから
+    // 番号を与えられる。
+    function applyImportedCounter(importedNextRecordNumber, mode) {
+      if (typeof importedNextRecordNumber !== "number") return;
+      if (mode === "replace") {
+        setNextRecordNumber(importedNextRecordNumber);
+      } else {
+        setNextRecordNumber(Math.max(getNextRecordNumber(), importedNextRecordNumber));
+      }
     }
 
     function formatTimestamp(iso) {
@@ -424,7 +488,9 @@
 
           const ts = document.createElement("span");
           ts.className = "timestamp";
-          ts.textContent = formatTimestamp(entry.createdAt);
+          const recordNumberText =
+            typeof entry.recordNumber === "number" ? formatRecordNumber(entry.recordNumber) + " · " : "";
+          ts.textContent = recordNumberText + formatTimestamp(entry.createdAt);
 
           const text = document.createElement("div");
           text.className = "text";
@@ -447,10 +513,14 @@
       }
 
       const entries = loadEntries();
+      const nextNumber = getNextRecordNumber();
       entries.push({
+        id: generateEntryId(),
+        recordNumber: nextNumber,
         text: value,
         createdAt: new Date().toISOString()
       });
+      setNextRecordNumber(nextNumber + 1);
       saveEntries(entries);
 
       input.value = "";
@@ -540,6 +610,7 @@
     const importCancelBtn = document.getElementById("import-cancel-btn");
 
     let pendingImportEntries = null;
+    let pendingImportNextRecordNumber = null;
     let backupHintTimer = null;
 
     function setBackupHint(message) {
@@ -596,9 +667,12 @@
 
       try {
         const payload = {
-          version: 1,
+          version: 2,
           exportedAt: new Date().toISOString(),
-          entries: entries
+          entries: entries,
+          // DEC-0013: recordNumberの発行元であるカウンターも、記録本体と一緒に
+          // 書き出す。これにより、別端末への復元後も番号の巻き戻り・重複を防げる。
+          nextRecordNumber: getNextRecordNumber()
         };
         const filename = `being-log-${getDateStringForFilename()}.json`;
         downloadJSON(filename, payload);
@@ -659,6 +733,8 @@
         }
 
         pendingImportEntries = payload.entries;
+        pendingImportNextRecordNumber =
+          typeof payload.nextRecordNumber === "number" ? payload.nextRecordNumber : null;
         const exportedAtText = payload.exportedAt ? formatTimestamp(payload.exportedAt) : "unknown";
         importModalText.textContent =
           `"${file.name}" contains ${payload.entries.length} entries (backed up: ${exportedAtText}). ` +
@@ -677,6 +753,7 @@
     function closeImportModal() {
       importModal.hidden = true;
       pendingImportEntries = null;
+      pendingImportNextRecordNumber = null;
       importFileInput.value = "";
     }
 
@@ -691,6 +768,10 @@
         const current = loadEntries();
         const merged = current.concat(pendingImportEntries);
         saveEntries(merged);
+        // DEC-0013: 追加(マージ)時は、今のカウンターと読み込んだカウンターの
+        // 大きい方を採用してから、番号を持たない記録があれば付与する。
+        applyImportedCounter(pendingImportNextRecordNumber, "append");
+        migrateRecordNumbers();
         render();
         setBackupHint(`${count} entries restored (added to existing).`);
       } catch (e) {
@@ -704,6 +785,10 @@
       const count = pendingImportEntries.length;
       try {
         saveEntries(pendingImportEntries);
+        // DEC-0013: 置き換え時は、読み込んだカウンターをそのまま採用してから、
+        // 番号を持たない記録があれば付与する。
+        applyImportedCounter(pendingImportNextRecordNumber, "replace");
+        migrateRecordNumbers();
         render();
         setBackupHint(`${count} entries restored (existing entries replaced).`);
       } catch (e) {
@@ -712,6 +797,8 @@
       closeImportModal();
     });
 
+    // DEC-0012: 新しい記録を1件でも作る前に、recordNumberの初回移行を必ず終わらせる。
+    migrateRecordNumbers();
     showDailyPhrase();
     render();
   </script>
