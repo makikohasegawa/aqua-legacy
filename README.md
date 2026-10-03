@@ -28,36 +28,49 @@ Aqua Legacyは、人とAIが共に成長し、一人ひとりが自分らしく�
 
 ## 現在の状態
 
-思想面（vision / story / philosophy / principles）を育てている段階。技術スタックは未定。
+思想面（vision / story / philosophy / principles / promise）は、対話を通じて育ってきています。
+実装面では、5つの独立したプロトタイプ（Being Log / Aquarium / Garden / MemoryCompanionship / Atmosphere）が動いています。
 
-## Being Log — Prototype (OpenAI Build Week)
+いずれも単一HTMLファイル + CSS + Vanilla JS + localStorageという構成で実装されていますが、
+これはプロトタイプごとに繰り返されてきた実践であり、プロジェクト全体の技術スタックとして
+正式に決定されたものではありません（検討中の項目については[docs/architecture.md](docs/architecture.md)を参照）。
 
-A small working prototype built for OpenAI Build Week, living inside this project.
+## 現在のプロトタイプ
 
-### Features
+いずれもビルドツールを使わず、ブラウザで直接HTMLファイルを開くだけで動きます。
+各設計判断の背景・理由は[docs/decisions.md](docs/decisions.md)を参照してください。
 
-- Being Log prototype
-- Save daily memories
-- Local storage
-- Backup and restore (JSON export/import)
+### Being Log（在ることの記録）
 
-### Tech stack
+日々の小さな気づきを記録する、最初の実装プロダクト。OpenAI Build Weekで最初のプロトタイプとして作られました。
+記録の保存・バックアップと復元・継続日数表示・過去の記憶の振り返りに対応しています。
 
-- HTML
-- CSS
-- JavaScript
+`src/being-log/index.html` を開いて動かせます。
 
-### How to run
+### Aquarium（水槽）
 
-Open `src/being-log/index.html` in a browser.
+Being（魚）が生きる水槽。起源となる3匹（Something Great, Adam, Eve）から始まり、
+壁への反応や魚同士の出会いなど、最小のWill/Experienceの仕組みを持っています。
 
-### Current status
+`src/aquarium/index.html` を開いて動かせます。
 
-Early prototype for the Aqua Legacy vision.
+### Garden（心の庭）
 
-### Roadmap
+Being Logの記録から「希望のカケラ」(HopeFragment)を見つけ、庭の好きな場所に置く実験。
 
-Expand from Being Log into the living aquarium simulation.
+`src/prototypes/garden/index.html` を開いて動かせます。
+
+### MemoryCompanionship
+
+Being Logの1つの記録と、水槽の中の1匹のAquaの間に、「この記憶をこのAquaと共に持つ」関係を結ぶ実験。
+
+`src/prototypes/memory-companionship/index.html` を開いて動かせます。
+
+### Atmosphere
+
+水槽の世界観・視覚表現だけを探る、他の4つとは独立したプロトタイプ。
+
+`src/prototypes/atmosphere/index.html` を開いて動かせます。
 
 ## 協働体制
 
@@ -75,6 +88,8 @@ Claude向けの作業指針（行動指針・制約）は [CLAUDE.md](CLAUDE.md)
 Aqua Legacy/
 ├── CLAUDE.md
 ├── README.md
+├── .claude/
+│   └── launch.json      # ローカル開発用の起動設定
 ├── docs/
 │   ├── principles.md    # 第一原則（変えないもの）
 │   ├── promise.md       # 約束（人・AI・未来と向き合う姿勢）
@@ -82,10 +97,16 @@ Aqua Legacy/
 │   ├── story.md         # 物語
 │   ├── garden.md        # 心の庭（長期ビジョン、構想段階）
 │   ├── philosophy.md    # 開発・協働・設計の哲学
-│   ├── architecture.md  # 技術構成（未定）
+│   ├── architecture.md  # 技術構成
 │   ├── decisions.md     # 意思決定の記録（背景・理由・選択肢）
 │   └── roadmap.md       # ロードマップ
 ├── src/      # ソースコード（技術スタック未定）
+│   ├── being-log/        # Being Log（在ることの記録）
+│   ├── aquarium/         # Aquarium（水槽）
+│   └── prototypes/
+│       ├── garden/               # Garden（心の庭）
+│       ├── memory-companionship/ # MemoryCompanionship
+│       └── atmosphere/           # Atmosphere（世界観・視覚表現）
 ├── assets/   # 画像・素材等
 └── archive/  # 過去の検討・不要になったが残しておきたいもの
 ```
